@@ -2,6 +2,7 @@
 import 'package:go_router/go_router.dart';
 
 
+
 import '../../view/screens/auth/signin_signup/signin_signup.dart';
 import '../../view/screens/onbording/splash_screen.dart';
 import '../../view/screens/onbording/logo_screen.dart';
@@ -12,6 +13,7 @@ import '../../view/screens/onbording/onbording_screen4.dart';
 import '../../view/screens/auth/signin_signup/sign_in.dart';
 import '../../view/screens/auth/signin_signup/sign_up.dart';
 import '../../view/screens/user_flow/home/home.dart';
+import '../../view/screens/user_flow/home/test.dart';
 import '../../view/screens/user_flow/user_profile/profile.dart';
 import '../../view/screens/user_flow/talk_with_ai/ai_chat_bot.dart';
 import '../../view/screens/user_flow/instant_translation/instant_translation.dart';
@@ -22,6 +24,10 @@ import 'app_routes.dart';
 class AppPages {
   static final GoRouter router = GoRouter(
     routes: [
+      GoRoute(
+        path: AppRoutes.test,
+        builder: (context, state) => const SubscriptionPopup(),
+      ),
       GoRoute(
         path: AppRoutes.splash,
         builder: (context, state) => const SplashScreen(),

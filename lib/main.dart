@@ -10,7 +10,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     DevicePreview(
-      enabled: true, // Production এ false করে দিও
+      enabled: true,
       builder: (context) => const HelpMeSpeakApp(),
     ),
   );

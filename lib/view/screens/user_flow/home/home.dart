@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../../../app/routes/app_routes.dart';
 import '../../../../gen/assets.gen.dart';
 import '../../../widgets/navigation.dart';
+import '../../../widgets/subscription_popup.dart';
 
-
-/// HomeScreen: Dashboard with background sections and navigation
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -17,13 +14,46 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  bool _subscriptionShown = false; // Ensure popup shows once after sign-in
 
-  /// Handle bottom navigation tap
+  @override
+  void initState() {
+    super.initState();
+    // Show subscription popup after first frame (after sign-in landing)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_subscriptionShown) {
+        _subscriptionShown = true;
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          barrierColor: Colors.transparent, // Design keeps background visible
+          builder: (_) => const SubscriptionPopup(),
+        );
+      }
+    });
+  }
+
   void _onNavTap(int index) {
     setState(() {
       _currentIndex = index;
     });
-    // TODO: Implement bottom nav routing if required
+    switch (index) {
+      case 0:
+        context.go(AppRoutes.home);
+        break;
+      case 1:
+        context.go(AppRoutes.instantTranslation);
+        break;
+      case 2:
+        context.go(AppRoutes.aiChatBot);
+        break;
+      case 3:
+        context.go(AppRoutes.phrasebook);
+        break;
+      case 4:
+        context.go(AppRoutes.profile);
+        break;
+    }
   }
 
   @override
@@ -43,18 +73,15 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// ----------------------------------------
-                /// Header section → Profile avatar + texts
-                /// ----------------------------------------
+                // Header: Avatar + Greetings
                 Row(
                   children: [
-                    // Profile Avatar
                     Container(
                       width: 52,
                       height: 52,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black26, width: 2),
                         shape: BoxShape.circle,
+                        border: Border.all(color: Colors.black26, width: 2),
                         image: DecorationImage(
                           image: Assets.images.profile.provider(),
                           fit: BoxFit.cover,
@@ -62,25 +89,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // Username + subtitle
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      children: const [
                         Text(
-                          "Hello Nurledin",
-                          style: GoogleFonts.poppins(
+                          'Hello Nurledin',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF202124),
+                            color: Color(0xFF202124),
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4),
                         Text(
-                          "Ready to learn today?",
-                          style: GoogleFonts.poppins(
+                          'Ready to learn today?',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: const Color(0xFF202124),
+                            color: Color(0xFF202124),
                           ),
                         ),
                       ],
@@ -90,9 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const SizedBox(height: 30),
 
-                /// ----------------------------------------
-                /// Section 1 (Static Banner: home1sec)
-                /// ----------------------------------------
+                // Static banner
                 Container(
                   width: double.infinity,
                   height: 194,
@@ -106,23 +132,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const SizedBox(height: 30),
 
-                /// ----------------------------------------
-                /// Section Title
-                /// ----------------------------------------
-                Text(
-                  "Choose a feature to start",
-                  style: GoogleFonts.poppins(
+                const Text(
+                  'Choose a feature to start',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF3A4E77),
+                    color: Color(0xFF3A4E77),
                   ),
                 ),
 
                 const SizedBox(height: 20),
 
-                /// ----------------------------------------
-                /// Feature 1 → Instant Translation (home2sec)
-                /// ----------------------------------------
+                // Feature 1: Instant Translation (full width)
                 GestureDetector(
                   onTap: () => context.go(AppRoutes.instantTranslation),
                   child: Container(
@@ -139,12 +161,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const SizedBox(height: 30),
 
-                /// ----------------------------------------
-                /// Feature 2 + 3 → AI ChatBot & Phrasebook
-                /// ----------------------------------------
+                // Feature 2 & 3: Two side-by-side
                 Row(
                   children: [
-                    // Left card (AI ChatBot → home3sec)
                     Expanded(
                       child: GestureDetector(
                         onTap: () => context.go(AppRoutes.aiChatBot),
@@ -159,10 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-
                     const SizedBox(width: 16),
-
-                    // Right card (Phrasebook → home4sec)
                     Expanded(
                       child: GestureDetector(
                         onTap: () => context.go(AppRoutes.phrasebook),
@@ -187,9 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-      /// ----------------------------------------
-      /// Custom Bottom Navigation
-      /// ----------------------------------------
+      // Custom Bottom Navigation
       bottomNavigationBar: CustomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onNavTap,

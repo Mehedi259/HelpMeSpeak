@@ -1,6 +1,7 @@
 // lib/app/routes/app_routes.dart
 
 class AppRoutes {
+  static const String test = '/test';
   static const String splash = '/';
   static const String logo = '/logo';
   static const String onboarding1 = '/onboarding1';
@@ -14,8 +15,8 @@ class AppRoutes {
   static const String signup = '/signup';
   static const String home = '/home';
   static const String profile = '/profile';
-  static const String aiChatBot = '/ai-chat';
-  static const String instantTranslation = '/instant-translation';
+  static const String aiChatBot = '/aiChatBot';
+  static const String instantTranslation = '/instantTranslation';
   static const String phrasebook = '/phrasebook';
   static const String singInsignUp = '/singInsignUp';
 }
