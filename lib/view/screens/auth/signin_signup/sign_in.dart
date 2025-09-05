@@ -31,45 +31,21 @@ class _SignInScreenState extends State<SignInScreen> {
 
   // Sign in button logic
   void _handleSignIn() {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
-      return;
-    }
-
-    if (!_isValidEmail(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid email address')),
-      );
-      return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Sign in successful!')),
-    );
-    context.go(AppRoutes.home);
+    context.go(AppRoutes.subscription);
   }
 
-  void _handleSignUp() => context.go(AppRoutes.home);
+  void _handleSignUp() => context.go(AppRoutes.signup);
 
   void _handleForgotPassword() {
       context.go(AppRoutes.forgetPassword);
   }
 
   void _handleGoogleSignIn() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Google Sign In')),
-    );
+    context.go(AppRoutes.subscription);
   }
 
   void _handleFacebookSignIn() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Facebook Sign In')),
-    );
+    context.go(AppRoutes.subscription);
   }
 
   bool _isValidEmail(String email) {

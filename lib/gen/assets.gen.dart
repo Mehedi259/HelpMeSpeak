@@ -22,12 +22,24 @@ class $AssetsIconsGen {
   AssetGenImage get backwhite =>
       const AssetGenImage('assets/icons/backwhite.png');
 
+  /// File path: assets/icons/bidirection.png
+  AssetGenImage get bidirection =>
+      const AssetGenImage('assets/icons/bidirection.png');
+
   /// File path: assets/icons/blackback.png
   AssetGenImage get blackback =>
       const AssetGenImage('assets/icons/blackback.png');
 
   /// File path: assets/icons/camera.png
   AssetGenImage get camera => const AssetGenImage('assets/icons/camera.png');
+
+  /// File path: assets/icons/chatbotmic.png
+  AssetGenImage get chatbotmic =>
+      const AssetGenImage('assets/icons/chatbotmic.png');
+
+  /// File path: assets/icons/dropdown.png
+  AssetGenImage get dropdown =>
+      const AssetGenImage('assets/icons/dropdown.png');
 
   /// File path: assets/icons/edit.png
   AssetGenImage get edit => const AssetGenImage('assets/icons/edit.png');
@@ -91,6 +103,9 @@ class $AssetsIconsGen {
   AssetGenImage get profilenav =>
       const AssetGenImage('assets/icons/profilenav.png');
 
+  /// File path: assets/icons/send.png
+  AssetGenImage get send => const AssetGenImage('assets/icons/send.png');
+
   /// File path: assets/icons/sound.png
   AssetGenImage get sound => const AssetGenImage('assets/icons/sound.png');
 
@@ -102,13 +117,24 @@ class $AssetsIconsGen {
   AssetGenImage get translate =>
       const AssetGenImage('assets/icons/translate.png');
 
+  /// File path: assets/icons/voiceactive.png
+  AssetGenImage get voiceactive =>
+      const AssetGenImage('assets/icons/voiceactive.png');
+
+  /// File path: assets/icons/voiceinactive.png
+  AssetGenImage get voiceinactive =>
+      const AssetGenImage('assets/icons/voiceinactive.png');
+
   /// List of all assets
   List<AssetGenImage> get values => [
         aichat,
         apple,
         backwhite,
+        bidirection,
         blackback,
         camera,
+        chatbotmic,
+        dropdown,
         edit,
         eyeoff,
         eyeon,
@@ -128,17 +154,20 @@ class $AssetsIconsGen {
         phrasebook,
         profile,
         profilenav,
+        send,
         sound,
         soundoff,
-        translate
+        translate,
+        voiceactive,
+        voiceinactive
       ];
 }
 
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
-  /// File path: assets/images/allbg.png
-  AssetGenImage get allbg => const AssetGenImage('assets/images/allbg.png');
+  /// File path: assets/images/ai.png
+  AssetGenImage get ai => const AssetGenImage('assets/images/ai.png');
 
   /// File path: assets/images/authbg.png
   AssetGenImage get authbg => const AssetGenImage('assets/images/authbg.png');
@@ -151,11 +180,22 @@ class $AssetsImagesGen {
   AssetGenImage get chatbot2 =>
       const AssetGenImage('assets/images/chatbot2.png');
 
+  /// File path: assets/images/chatbotbg.png
+  AssetGenImage get chatbotbg =>
+      const AssetGenImage('assets/images/chatbotbg.png');
+
+  /// File path: assets/images/chatbotbgup.png
+  AssetGenImage get chatbotbgup =>
+      const AssetGenImage('assets/images/chatbotbgup.png');
+
   /// File path: assets/images/crown.png
   AssetGenImage get crown => const AssetGenImage('assets/images/crown.png');
 
   /// File path: assets/images/dot.png
   AssetGenImage get dot => const AssetGenImage('assets/images/dot.png');
+
+  /// File path: assets/images/green.png
+  AssetGenImage get green => const AssetGenImage('assets/images/green.png');
 
   /// File path: assets/images/helpmespeak.png
   AssetGenImage get helpmespeak =>
@@ -207,8 +247,14 @@ class $AssetsImagesGen {
   AssetGenImage get onbordinglogo4 =>
       const AssetGenImage('assets/images/onbordinglogo4.png');
 
+  /// File path: assets/images/pink.png
+  AssetGenImage get pink => const AssetGenImage('assets/images/pink.png');
+
   /// File path: assets/images/profile.jpg
   AssetGenImage get profile => const AssetGenImage('assets/images/profile.jpg');
+
+  /// File path: assets/images/star.png
+  AssetGenImage get star => const AssetGenImage('assets/images/star.png');
 
   /// File path: assets/images/starlock.png
   AssetGenImage get starlock =>
@@ -220,12 +266,15 @@ class $AssetsImagesGen {
 
   /// List of all assets
   List<AssetGenImage> get values => [
-        allbg,
+        ai,
         authbg,
         chatbot1,
         chatbot2,
+        chatbotbg,
+        chatbotbgup,
         crown,
         dot,
+        green,
         helpmespeak,
         home1sec,
         home2sec,
@@ -239,7 +288,9 @@ class $AssetsImagesGen {
         onbordinglogo2,
         onbordinglogo3,
         onbordinglogo4,
+        pink,
         profile,
+        star,
         starlock,
         subscription
       ];

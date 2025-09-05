@@ -43,7 +43,7 @@ class SignInSignUpScreen extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 5.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -51,7 +51,7 @@ class SignInSignUpScreen extends StatelessWidget {
               Center(
                 child: Assets.images.helpmespeak.image(
                   width: double.infinity,
-                  height: 446,
+                  height: 350,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -72,7 +72,7 @@ class SignInSignUpScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 10),
 
               /// Primary CTA - Sign Up with Email
               CustomButton(
@@ -82,7 +82,7 @@ class SignInSignUpScreen extends StatelessWidget {
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               /// OR Separator
               Row(
@@ -114,7 +114,7 @@ class SignInSignUpScreen extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               /// Secondary CTA - Sign Up with Google
               Container(
@@ -130,7 +130,7 @@ class SignInSignUpScreen extends StatelessWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(10),
                   onTap: () {
-                    // TODO: Integrate Google Sign-In logic here
+                    context.go(AppRoutes.subscription);
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -140,7 +140,7 @@ class SignInSignUpScreen extends StatelessWidget {
                         width: 35,
                         height: 35,
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
 
                       /// Google SignUp Text
                       const Text(
@@ -158,7 +158,7 @@ class SignInSignUpScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
 
               /// Already have an account? Sign-in
               GestureDetector(
@@ -192,8 +192,6 @@ class SignInSignUpScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
-              const SizedBox(height: 40),
             ],
           ),
         ),

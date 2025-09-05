@@ -12,8 +12,10 @@ class AppRoutes {
   static const String opt = '/opt';
   static const String newpassword = '/newpassword';
   static const String signin = '/signin';
+  static const String subscription = '/subscription';
   static const String signup = '/signup';
   static const String home = '/home';
+  static const String subscriptionPayment = '/subscriptionPayment';
   static const String profile = '/profile';
   static const String aiChatBot = '/aiChatBot';
   static const String instantTranslation = '/instantTranslation';

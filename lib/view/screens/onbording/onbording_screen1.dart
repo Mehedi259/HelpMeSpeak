@@ -29,7 +29,7 @@ class OnboardingScreen1 extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(
                 children: [
-                  const SizedBox(height: 80),
+                  const SizedBox(height: 60),
 
                   /// Heading section with styled text
                   Container(
@@ -63,7 +63,7 @@ class OnboardingScreen1 extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 250),
 
                   /// Bottom navigation indicators + Next button
                   Column(

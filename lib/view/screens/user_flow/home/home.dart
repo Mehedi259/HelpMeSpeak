@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../../../../gen/assets.gen.dart';
 import '../../../widgets/navigation.dart';
-import '../../../widgets/subscription_popup.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -14,24 +13,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  bool _subscriptionShown = false; // Ensure popup shows once after sign-in
-
-  @override
-  void initState() {
-    super.initState();
-    // Show subscription popup after first frame (after sign-in landing)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_subscriptionShown) {
-        _subscriptionShown = true;
-        showDialog(
-          context: context,
-          barrierDismissible: true,
-          barrierColor: Colors.transparent, // Design keeps background visible
-          builder: (_) => const SubscriptionPopup(),
-        );
-      }
-    });
-  }
 
   void _onNavTap(int index) {
     setState(() {
@@ -116,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 5),
 
                 // Static banner
                 Container(
@@ -130,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 5),
 
                 const Text(
                   'Choose a feature to start',
@@ -142,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 5),
 
                 // Feature 1: Instant Translation (full width)
                 GestureDetector(
@@ -159,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 5),
 
                 // Feature 2 & 3: Two side-by-side
                 Row(
@@ -195,8 +176,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 20),
               ],
             ),
           ),

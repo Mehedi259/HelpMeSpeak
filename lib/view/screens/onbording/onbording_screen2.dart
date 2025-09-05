@@ -51,7 +51,7 @@ class OnboardingScreen2 extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
 
                   /// Centered logo
                   Assets.images.onbordinglogo3.image(
@@ -59,7 +59,7 @@ class OnboardingScreen2 extends StatelessWidget {
                     height: 300,
                   ),
 
-                  const SizedBox(height: 80),
+                  const SizedBox(height: 60),
 
                   /// Title text
                   const Text(

@@ -2,18 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:device_preview/device_preview.dart';
 import 'app/routes/app_pages.dart';
 import 'app/theme/app_theme.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(
-    DevicePreview(
-      enabled: true,
-      builder: (context) => const HelpMeSpeakApp(),
-    ),
-  );
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  runApp(const HelpMeSpeakApp());
 }
 
 class HelpMeSpeakApp extends StatelessWidget {
@@ -24,6 +20,7 @@ class HelpMeSpeakApp extends StatelessWidget {
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
+      splitScreenMode: true,
       builder: (context, child) {
         return GetMaterialApp.router(
           title: 'HelpMeSpeak',
@@ -32,9 +29,6 @@ class HelpMeSpeakApp extends StatelessWidget {
           routerDelegate: AppPages.router.routerDelegate,
           routeInformationParser: AppPages.router.routeInformationParser,
           routeInformationProvider: AppPages.router.routeInformationProvider,
-          // device preview এর config
-          locale: DevicePreview.locale(context),
-          builder: DevicePreview.appBuilder,
         );
       },
     );
