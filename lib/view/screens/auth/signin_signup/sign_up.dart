@@ -61,7 +61,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    context.go(AppRoutes.signin);
+    context.go(AppRoutes.opt);
   }
 
   /// Navigate back to sign in

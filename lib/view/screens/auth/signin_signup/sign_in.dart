@@ -48,9 +48,7 @@ class _SignInScreenState extends State<SignInScreen> {
     context.go(AppRoutes.subscription);
   }
 
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
-  }
+
 
   @override
   Widget build(BuildContext context) {
