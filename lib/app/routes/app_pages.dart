@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../view/screens/auth/forget_password/forget_password.dart';
 import '../../view/screens/auth/forget_password/new_password.dart';
 import '../../view/screens/auth/forget_password/otp_screen.dart';
+import '../../view/screens/auth/signin_signup/otp_screen.dart';
 import '../../view/screens/auth/signin_signup/signin_signup.dart';
 import '../../view/screens/onbording/splash_screen.dart';
 import '../../view/screens/onbording/logo_screen.dart';
@@ -18,10 +19,11 @@ import '../../view/screens/auth/signin_signup/sign_up.dart';
 import '../../view/screens/user_flow/home/home.dart';
 import '../../view/screens/user_flow/home/subscription_payment.dart';
 import '../../view/screens/user_flow/home/subscription_popup.dart';
+import '../../view/screens/user_flow/phrasebook/phrasebook.dart';
 import '../../view/screens/user_flow/user_profile/profile.dart';
 import '../../view/screens/user_flow/talk_with_ai/ai_chat_bot.dart';
 import '../../view/screens/user_flow/instant_translation/instant_translation.dart';
-import '../../view/screens/user_flow/phrasebook/pharsebook.dart';
+
 
 import 'app_routes.dart';
 
@@ -57,21 +59,30 @@ class AppPages {
         builder: (context, state) => const SignInScreen(),
       ),
       GoRoute(
+        path: AppRoutes.authOtp,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final email = extra?["email"] ?? "";
+          return AuthOtpScreen(email: email);
+        },
+      ),
+
+      GoRoute(
         path: AppRoutes.subscription,
         builder: (context, state) => const SubscriptionScreen(),
       ),
-        GoRoute(
-          path: AppRoutes.forgetPassword,
-          builder: (context, state) => const ForgotPasswordScreen(),
-        ),
-        GoRoute(
-          path: AppRoutes.opt,
-          builder: (context, state) => const OtpScreen(email: '',),
-        ),
-        GoRoute(
-          path: AppRoutes.newpassword,
-          builder: (context, state) => const CreateNewPasswordScreen(),
-        ),
+      GoRoute(
+        path: AppRoutes.forgetPassword,
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.otp,
+        builder: (context, state) => const OtpScreen(email: '',),
+      ),
+      GoRoute(
+        path: AppRoutes.newpassword,
+        builder: (context, state) => const CreateNewPasswordScreen(),
+      ),
 
       GoRoute(
         path: AppRoutes.signup,

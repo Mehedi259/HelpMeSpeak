@@ -1,7 +1,7 @@
 // lib/view/screens/ai_chatbot/ai_chatbot_screen.dart
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'package:permission_handler/permission_handler.dart'; // 🔑 new
+import 'package:permission_handler/permission_handler.dart';
 import '../../../../gen/assets.gen.dart';
 import '../../../widgets/navigation.dart';
 import 'package:go_router/go_router.dart';

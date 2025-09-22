@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed; // <-- nullable now
+  final bool isLoading;           // Optional: loading state handle করার জন্য
 
   const CustomButton({
     Key? key,
     required this.text,
-    required this.onPressed,
+    this.onPressed,
+    this.isLoading = false,
   }) : super(key: key);
 
   @override
@@ -19,14 +21,25 @@ class CustomButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2196F3),
+          backgroundColor: onPressed != null
+              ? const Color(0xFF2196F3)
+              : Colors.grey.shade400, // disabled color
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: Text(
+        child: isLoading
+            ? const SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            color: Colors.white,
+            strokeWidth: 2,
+          ),
+        )
+            : Text(
           text,
           style: const TextStyle(
             fontSize: 16,

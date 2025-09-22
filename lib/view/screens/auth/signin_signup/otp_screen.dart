@@ -1,23 +1,112 @@
+// import 'package:flutter/material.dart';
+// import 'package:get/get.dart';
+// import '../../../../controllers/auth_controller.dart';
+// import '../../../widgets/opt_button.dart';
+//
+// class AuthOtpScreen extends StatefulWidget {
+//   final String email;
+//
+//   const AuthOtpScreen({Key? key, required this.email}) : super(key: key);
+//
+//   @override
+//   State<AuthOtpScreen> createState() => _AuthOtpScreenState();
+// }
+//
+// class _AuthOtpScreenState extends State<AuthOtpScreen> {
+//   final TextEditingController otpController = TextEditingController();
+//   bool isOtpComplete = false;
+//
+//   @override
+//   void dispose() {
+//     otpController.dispose();
+//     super.dispose();
+//   }
+//
+//   void _handleVerifyCode() {
+//     if (isOtpComplete) {
+//       final code = otpController.text.trim();
+//       final authController = Get.find<AuthController>();
+//
+//       authController.verifyOtp(
+//         context,
+//         widget.email,
+//         code,
+//         "email_verification",
+//       );
+//     }
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final authController = Get.find<AuthController>();
+//
+//     return Scaffold(
+//       body: SafeArea(
+//         child: Column(
+//           children: [
+//             const SizedBox(height: 20),
+//
+//             /// Header text
+//             Text(
+//               "Enter the 6 digit code sent to ${widget.email}",
+//               textAlign: TextAlign.center,
+//               style: const TextStyle(fontSize: 14, color: Colors.black54),
+//             ),
+//             const SizedBox(height: 40),
+//
+//             /// OTP Input Field
+//             Padding(
+//               padding: const EdgeInsets.symmetric(horizontal: 50),
+//               child: TextField(
+//                 controller: otpController,
+//                 keyboardType: TextInputType.number,
+//                 maxLength: 6,
+//                 onChanged: (value) {
+//                   setState(() {
+//                     isOtpComplete = value.length == 6;
+//                   });
+//                 },
+//                 decoration: const InputDecoration(
+//                   hintText: "Enter OTP",
+//                   counterText: "",
+//                   border: OutlineInputBorder(),
+//                 ),
+//               ),
+//             ),
+//             const SizedBox(height: 40),
+//
+//             /// Verify Button
+//             Obx(() {
+//               return OptButton(
+//                 text: authController.isLoading.value
+//                     ? "Verifying..."
+//                     : "Verify Code",
+//                 isEnabled: isOtpComplete && !authController.isLoading.value,
+//                 onPressed: _handleVerifyCode,
+//               );
+//             }),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:go_router/go_router.dart';
-
-import '../../../../app/routes/app_routes.dart';
+import '../../../../controllers/auth_controller.dart';
 import '../../../widgets/opt_button.dart';
 
-class OtpScreen extends StatefulWidget {
+class AuthOtpScreen extends StatefulWidget {
   final String email;
 
-  const OtpScreen({
-    Key? key,
-    required this.email,
-  }) : super(key: key);
+  const AuthOtpScreen({Key? key, required this.email}) : super(key: key);
 
   @override
-  State<OtpScreen> createState() => _OtpScreenState();
+  State<AuthOtpScreen> createState() => _AuthOtpScreenState();
 }
 
-class _OtpScreenState extends State<OtpScreen> {
+class _AuthOtpScreenState extends State<AuthOtpScreen> {
   final TextEditingController otpController = TextEditingController();
   bool isOtpComplete = false;
 
@@ -30,19 +119,15 @@ class _OtpScreenState extends State<OtpScreen> {
   /// Handle verify code button press
   void _handleVerifyCode() {
     if (isOtpComplete) {
-      final code = otpController.text;
+      final code = otpController.text.trim();
+      final authController = Get.find<AuthController>();
 
-      if (_isValidOtp(code)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Code verified successfully!')),
-        );
-        // Navigate to password reset screen
-         context.go(AppRoutes.signin);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid code. Please try again.')),
-        );
-      }
+      authController.verifyOtp(
+        context,
+        widget.email,
+        code,
+        "email_verification",
+      );
     }
   }
 
@@ -60,16 +145,13 @@ class _OtpScreenState extends State<OtpScreen> {
 
   /// Navigate back
   void _handleBack() {
-    context.go(AppRoutes.forgetPassword);
-  }
-
-  /// Validate OTP (example validation - replace with your logic)
-  bool _isValidOtp(String otp) {
-    return otp.length == 6;
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    final authController = Get.find<AuthController>();
+
     return Scaffold(
       body: Stack(
         children: [
@@ -100,7 +182,7 @@ class _OtpScreenState extends State<OtpScreen> {
                       ),
                       const Expanded(
                         child: Text(
-                          'Reset Password',
+                          'Verify Email',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white,
@@ -134,7 +216,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
                           // Description text
                           Text(
-                            'We sent a reset link to ${widget.email} enter 6 digit code that mentioned in the email',
+                            'We sent a 6 digit verification code to ${widget.email}. Please enter it below to verify your account.',
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               fontSize: 14,
@@ -183,12 +265,17 @@ class _OtpScreenState extends State<OtpScreen> {
 
                           const SizedBox(height: 40),
 
-                          // Verify code button (New OptButton)
-                          OptButton(
-                            text: "Verify code",
-                            isEnabled: isOtpComplete,
-                            onPressed: _handleVerifyCode,
-                          ),
+                          // Verify code button (using OptButton)
+                          Obx(() {
+                            return OptButton(
+                              text: authController.isLoading.value
+                                  ? "Verifying..."
+                                  : "Verify Code",
+                              isEnabled:
+                              isOtpComplete && !authController.isLoading.value,
+                              onPressed: _handleVerifyCode,
+                            );
+                          }),
 
                           const SizedBox(height: 30),
 

@@ -1,14 +1,11 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'controllers/auth_controller.dart';
 import 'app/routes/app_pages.dart';
-import 'app/theme/app_theme.dart';
-import 'package:flutter/services.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  Get.put(AuthController()); // AuthController globally available
   runApp(const HelpMeSpeakApp());
 }
 
@@ -17,20 +14,16 @@ class HelpMeSpeakApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(375, 812),
-      minTextAdapt: true,
-      splitScreenMode: true,
-      builder: (context, child) {
-        return GetMaterialApp.router(
-          title: 'HelpMeSpeak',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          routerDelegate: AppPages.router.routerDelegate,
-          routeInformationParser: AppPages.router.routeInformationParser,
-          routeInformationProvider: AppPages.router.routeInformationProvider,
-        );
-      },
+    return GetMaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      title: "HelpMeSpeak",
+      routerDelegate: AppPages.router.routerDelegate,
+      routeInformationParser: AppPages.router.routeInformationParser,
+      routeInformationProvider: AppPages.router.routeInformationProvider,
+      theme: ThemeData(
+        primarySwatch: Colors.indigo,
+        scaffoldBackgroundColor: Colors.white,
+      ),
     );
   }
 }

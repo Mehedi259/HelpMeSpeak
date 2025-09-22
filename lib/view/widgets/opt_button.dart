@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 class OptButton extends StatelessWidget {
   final String text;
-  final bool isEnabled; // OTP complete হলে true হবে
-  final VoidCallback onPressed;
+  final bool isEnabled;
+  final VoidCallback? onPressed;
 
   const OptButton({
     super.key,

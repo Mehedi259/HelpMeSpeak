@@ -52,7 +52,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
 
     // Navigate to verification screen or back to sign in
-     context.go(AppRoutes.opt);
+     context.go(AppRoutes.otp);
   }
 
   /// Navigate back to sign in
@@ -62,7 +62,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   /// Validate email format
   bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+    return RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
   @override

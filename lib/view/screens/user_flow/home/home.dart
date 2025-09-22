@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../../../../gen/assets.gen.dart';
+import '../../../../controllers/auth_controller.dart';
 import '../../../widgets/navigation.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,6 +15,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  final AuthController _authController = Get.put(AuthController());
+
+  @override
+  void initState() {
+    super.initState();
+    _authController.fetchUserData();
+  }
 
   void _onNavTap(int index) {
     setState(() {
@@ -40,7 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Background image
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
@@ -57,43 +65,55 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Header: Avatar + Greetings
                 Row(
                   children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black26, width: 2),
-                        image: DecorationImage(
-                          image: Assets.images.profile.provider(),
-                          fit: BoxFit.cover,
+                    Obx(() {
+                      final user = _authController.user.value;
+                      return Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.black26, width: 2),
+                          image: DecorationImage(
+                            image: (user != null && user.profileImage.isNotEmpty)
+                                ? NetworkImage(user.profileImage)
+                                : Assets.images.profile.provider(),
+                            fit: BoxFit.contain,
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    }),
+
                     const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Hello Nurledin',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF202124),
+                    Obx(() {
+                      final user = _authController.user.value;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user != null && user.fullName.isNotEmpty
+                                ? "Hello ${user.fullName}"
+                                : "Hello ...",
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF202124),
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Ready to learn today?',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xFF202124),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Ready to learn today?',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFF202124),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      );
+                    }),
+
                   ],
                 ),
 
@@ -125,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const SizedBox(height: 5),
 
-                // Feature 1: Instant Translation (full width)
+                // Feature 1
                 GestureDetector(
                   onTap: () => context.go(AppRoutes.instantTranslation),
                   child: Container(
@@ -142,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const SizedBox(height: 5),
 
-                // Feature 2 & 3: Two side-by-side
+                // Feature 2 & 3
                 Row(
                   children: [
                     Expanded(
@@ -182,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-      // Custom Bottom Navigation
+      // Bottom Navigation
       bottomNavigationBar: CustomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onNavTap,
