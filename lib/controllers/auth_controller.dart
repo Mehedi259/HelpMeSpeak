@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import '../app/routes/app_routes.dart';
+import '../app/constants/api_constants.dart';
 import '../data/models/user_model.dart';
 import '../data/services/api_service.dart';
 import '../data/services/auth_service.dart';
@@ -10,8 +11,6 @@ import '../utils/storage_helper.dart';
 class AuthController extends GetxController {
   var isLoading = false.obs;
   var user = Rxn<UserModel>();
-
-  static const String baseUrl = "https://helpmespeak.onrender.com";
 
   // ===== Login =====
   Future<void> login(BuildContext context, String email, String password,
@@ -114,7 +113,7 @@ class AuthController extends GetxController {
     }
   }
 
-  // ============ Fetch User Data with Better Error Handling ===============
+  // ============ Fetch User Data ===============
   Future<void> fetchUserData() async {
     try {
       final data = await ApiService.getRequest("/auth/me/");
@@ -122,55 +121,37 @@ class AuthController extends GetxController {
       if (data != null && data is Map<String, dynamic>) {
         String profileImage = "";
 
-        // Check if profile_image exists and is not null/empty
         if (data["profile_image"] != null &&
             data["profile_image"].toString().isNotEmpty &&
             data["profile_image"].toString() != "null") {
-
           profileImage = data["profile_image"].toString();
 
-          // Only add baseUrl if it's a relative path
           if (!profileImage.startsWith("http")) {
-            profileImage = "$baseUrl$profileImage";
+            profileImage = "${ApiConstants.baseUrl}$profileImage";
           }
-
-          // Validate if the URL is accessible (optional)
-          print("Profile image URL: $profileImage");
         }
 
         user.value = UserModel(
           email: data["email"]?.toString() ?? "",
-          fullName: data["full_name"]?.toString() ?? data["username"]?.toString() ?? "",
+          fullName: data["full_name"]?.toString() ??
+              data["username"]?.toString() ??
+              "",
           profileImage: profileImage,
         );
 
         print("User data loaded successfully: ${user.value?.fullName}");
-
       } else {
         print("Unexpected response format: $data");
-        // Set default user data
-        user.value = UserModel(
-          email: "",
-          fullName: "User",
-          profileImage: "",
-        );
+        user.value = UserModel(email: "", fullName: "User", profileImage: "");
       }
     } catch (e) {
       print("Error fetching user data: $e");
-      // Set default user data on error
-      user.value = UserModel(
-        email: "",
-        fullName: "User",
-        profileImage: "",
-      );
+      user.value = UserModel(email: "", fullName: "User", profileImage: "");
     }
   }
 
-  // Helper method to check if profile image is valid
   bool isValidImageUrl(String url) {
     if (url.isEmpty) return false;
-
-    // Check if it's a valid HTTP/HTTPS URL
     try {
       final uri = Uri.parse(url);
       return uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https');
@@ -179,7 +160,6 @@ class AuthController extends GetxController {
     }
   }
 
-  // Method to get safe profile image URL
   String getSafeProfileImageUrl() {
     final profileImage = user.value?.profileImage ?? "";
     return isValidImageUrl(profileImage) ? profileImage : "";

@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../utils/storage_helper.dart';
+import '../../app/constants/api_constants.dart';
 
 class ApiService {
-  static const String baseUrl = "https://helpmespeak.onrender.com/api";
-
   /// =============================
   /// Generic GET request
   /// =============================
@@ -12,7 +11,8 @@ class ApiService {
       {Map<String, String>? queryParams}) async {
     try {
       final token = await StorageHelper.getToken();
-      final uri = Uri.parse("$baseUrl$endpoint").replace(queryParameters: queryParams);
+      final uri = Uri.parse("${ApiConstants.baseUrl}$endpoint")
+          .replace(queryParameters: queryParams);
 
       final response = await http.get(
         uri,
@@ -32,7 +32,7 @@ class ApiService {
       {Map<String, dynamic>? body}) async {
     try {
       final token = await StorageHelper.getToken();
-      final uri = Uri.parse("$baseUrl$endpoint");
+      final uri = Uri.parse("${ApiConstants.baseUrl}$endpoint");
 
       final response = await http.post(
         uri,
@@ -53,7 +53,7 @@ class ApiService {
       {Map<String, dynamic>? body}) async {
     try {
       final token = await StorageHelper.getToken();
-      final uri = Uri.parse("$baseUrl$endpoint");
+      final uri = Uri.parse("${ApiConstants.baseUrl}$endpoint");
 
       final response = await http.put(
         uri,
@@ -73,7 +73,7 @@ class ApiService {
   static Future<dynamic> deleteRequest(String endpoint) async {
     try {
       final token = await StorageHelper.getToken();
-      final uri = Uri.parse("$baseUrl$endpoint");
+      final uri = Uri.parse("${ApiConstants.baseUrl}$endpoint");
 
       final response = await http.delete(
         uri,

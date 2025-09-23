@@ -1,12 +1,16 @@
-import '../services/api_service.dart';
+import '../../app/constants/api_constants.dart';
+import 'api_service.dart';
 
 class AuthService {
   /// ===== Login =====
   static Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await ApiService.postRequest("/auth/login/", body: {
-      "email": email,
-      "password": password,
-    });
+    final response = await ApiService.postRequest(
+      ApiConstants.login,
+      body: {
+        "email": email,
+        "password": password,
+      },
+    );
 
     if (response is List && response.isNotEmpty) {
       return response[0];
@@ -19,7 +23,10 @@ class AuthService {
 
   /// ===== Register =====
   static Future<Map<String, dynamic>> register(Map<String, dynamic> body) async {
-    final response = await ApiService.postRequest("/auth/register/", body: body);
+    final response = await ApiService.postRequest(
+      ApiConstants.signup,
+      body: body,
+    );
 
     if (response is List && response.isNotEmpty) {
       return response[0];
@@ -32,7 +39,10 @@ class AuthService {
 
   /// ===== Verify OTP =====
   static Future<Map<String, dynamic>> verifyOtp(Map<String, dynamic> body) async {
-    final response = await ApiService.postRequest("/auth/otp/verify/", body: body);
+    final response = await ApiService.postRequest(
+      ApiConstants.otpVerify,
+      body: body,
+    );
 
     if (response is List && response.isNotEmpty) {
       return response[0];
