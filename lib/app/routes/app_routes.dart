@@ -15,6 +15,7 @@ class AppRoutes {
   static const String home = '/home';
   static const String subscriptionPayment = '/subscriptionPayment';
   static const String profile = '/profile';
+  static const String editProfile = '/editProfile';
   static const String aiChatBot = '/aiChatBot';
   static const String instantTranslation = '/instantTranslation';
   static const String phrasebook = '/phrasebook';

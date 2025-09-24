@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../../../../gen/assets.gen.dart';
 import '../../../../controllers/auth_controller.dart';
@@ -67,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Obx(() {
                       final user = _authController.user.value;
+                      final profileUrl = user?.profileImage ?? "";
                       return Container(
                         width: 52,
                         height: 52,
@@ -74,10 +76,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.black26, width: 2),
                           image: DecorationImage(
-                            image: (user != null && user.profileImage.isNotEmpty)
-                                ? NetworkImage(user.profileImage)
+                            image: profileUrl.isNotEmpty
+                                ? CachedNetworkImageProvider(profileUrl)
                                 : Assets.images.profile.provider(),
-                            fit: BoxFit.contain,
+                            fit: BoxFit.cover,
                           ),
                         ),
                       );
@@ -113,7 +115,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       );
                     }),
-
                   ],
                 ),
 

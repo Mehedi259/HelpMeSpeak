@@ -20,6 +20,7 @@ import '../../view/screens/user_flow/home/home.dart';
 import '../../view/screens/user_flow/home/subscription_payment.dart';
 import '../../view/screens/user_flow/home/subscription_popup.dart';
 import '../../view/screens/user_flow/phrasebook/phrasebook.dart';
+import '../../view/screens/user_flow/user_profile/edit_profile.dart';
 import '../../view/screens/user_flow/user_profile/profile.dart';
 import '../../view/screens/user_flow/talk_with_ai/ai_chat_bot.dart';
 import '../../view/screens/user_flow/instant_translation/instant_translation.dart';
@@ -99,6 +100,10 @@ class AppPages {
       GoRoute(
         path: AppRoutes.profile,
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.editProfile,
+        builder: (context, state) => const EditProfileScreen(),
       ),
       GoRoute(
         path: AppRoutes.aiChatBot,

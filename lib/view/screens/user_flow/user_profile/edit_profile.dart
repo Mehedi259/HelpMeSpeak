@@ -1,20 +1,29 @@
-// lib/view/screens/profile/profile_screen.dart
+// lib/view/screens/profile/edit_profile_screen.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../gen/assets.gen.dart';
 import '../../../widgets/navigation.dart';
 import '../../../../app/routes/app_routes.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+class EditProfileScreen extends StatefulWidget {
+  const EditProfileScreen({Key? key}) : super(key: key);
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _EditProfileScreenState extends State<EditProfileScreen> {
   int _currentIndex = 4;
+
+  TextEditingController _fullNameController =
+  TextEditingController(text: "Nurledin");
+
+  File? _profileImage;
+
+  final ImagePicker _picker = ImagePicker();
 
   void _onNavTap(int index) {
     setState(() => _currentIndex = index);
@@ -34,6 +43,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       case 4:
         context.go(AppRoutes.profile);
         break;
+    }
+  }
+
+  /// Pick image from gallery or camera
+  Future<void> _pickImage() async {
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
     }
   }
 
@@ -63,12 +85,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () => context.go(AppRoutes.home),
+                      onTap: () => context.go(AppRoutes.profile),
                       child: Assets.icons.backwhite.image(width: 21, height: 21),
                     ),
                     const Spacer(),
                     const Text(
-                      "Profile",
+                      "Edit Profile",
                       style: TextStyle(
                         fontFamily: "Pontano Sans",
                         fontWeight: FontWeight.w600,
@@ -109,59 +131,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             children: [
                               CircleAvatar(
                                 radius: 60,
-                                backgroundImage:
-                                AssetImage(Assets.images.profile.path),
+                                backgroundImage: _profileImage != null
+                                    ? FileImage(_profileImage!) as ImageProvider
+                                    : AssetImage(Assets.images.profile.path),
                               ),
                               Positioned(
                                 bottom: 0,
                                 right: 6,
-                                child: CircleAvatar(
-                                  radius: 18,
-                                  backgroundColor: Colors.white,
-                                  child: Assets.icons.camera
-                                      .image(width: 20, height: 20),
+                                child: GestureDetector(
+                                  onTap: _pickImage,
+                                  child: CircleAvatar(
+                                    radius: 18,
+                                    backgroundColor: Colors.white,
+                                    child: Assets.icons.camera
+                                        .image(width: 20, height: 20),
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
                         const SizedBox(height: 30),
-                        /// Edit Profile Button
-                        Center(
-                          child: ElevatedButton(
-                            onPressed: () => context.go(AppRoutes.editProfile),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue.shade700,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 40, vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              "Edit Profile",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 50),
-                        /// Full Name
-                        _buildTextField("Full Name", "Nurledin"),
-                        const SizedBox(height: 16),
 
-                        /// Email
-                        _buildTextField("E-mail", "nurledin@gmail.com"),
-                        const SizedBox(height: 30),
+                        /// Full Name with Edit Icon
+                        _buildEditableTextField(
+                            "Full Name", _fullNameController),
+                        const SizedBox(height: 40),
 
-                        /// Sign Out Button
+                        /// Save Changes Button
                         Center(
                           child: ElevatedButton(
                             onPressed: () {
-
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      "Profile updated: ${_fullNameController.text}"),
+                                ),
+                              );
+                              context.go(AppRoutes.profile);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue.shade700,
@@ -172,7 +179,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                             child: const Text(
-                              "Sign Out",
+                              "Save Changes",
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -194,8 +201,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  /// Reusable TextField (full width, left align)
-  Widget _buildTextField(String label, String value) {
+  /// Editable TextField with Edit Icon
+  Widget _buildEditableTextField(
+      String label, TextEditingController controller) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Column(
@@ -212,16 +220,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 6),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
             decoration: BoxDecoration(
               color: Colors.grey.shade100,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 15,
-                color: Colors.black87,
+            child: TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                suffixIcon: Icon(
+                  Icons.edit,
+                  color: Colors.grey.shade600,
+                ),
+                border: InputBorder.none,
               ),
             ),
           ),
@@ -230,4 +241,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-

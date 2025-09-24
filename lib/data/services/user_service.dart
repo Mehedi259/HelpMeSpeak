@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/user_model.dart';
 
 class UserService {
-  static const String _baseUrl = 'https://helpmespeak.onrender.com/api';
+  static const String _baseUrl = 'http://10.10.7.116:8000/api';
 
   Future<UserModel?> getUserProfile() async {
     try {
