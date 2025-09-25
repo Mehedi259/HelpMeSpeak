@@ -28,26 +28,74 @@
 //   String _sourceLanguage = "English";
 //   String _targetLanguage = "Spanish";
 //
-//   final List<String> _languages = [
-//     "English",
-//     "Spanish",
-//     "French",
-//     "German",
-//     "Hindi",
-//     "Bengali",
-//     "Afrikaans",
-//     "Albanian",
-//     "Amharic",
-//     "Arabic",
-//     "Armenian",
-//     "Aymara",
-//     "Azerbaijani",
-//     "Bambara",
-//     "Basque",
-//     "Belarusian",
-//     "Bhojpuri",
-//     "Bosnian",
-//   ];
+// final List<String> _languages = [
+//   "Afrikaans",
+//   "Albanian",
+//   "Arabic",
+//   "Armenian",
+//   "Bengali",
+//   "Bosnian",
+//   "Catalan",
+//   "Croatian",
+//   "Czech",
+//   "Danish",
+//   "Dutch",
+//   "English",
+//   "Esperanto",
+//   "Estonian",
+//   "Finnish",
+//   "French",
+//   "German",
+//   "Greek",
+//   "Gujarati",
+//   "Hindi",
+//   "Hungarian",
+//   "Icelandic",
+//   "Indonesian",
+//   "Italian",
+//   "Japanese",
+//   "Javanese",
+//   "Kannada",
+//   "Khmer",
+//   "Korean",
+//   "Latin",
+//   "Latvian",
+//   "Lithuanian",
+//   "Macedonian",
+//   "Malayalam",
+//   "Marathi",
+//   "Burmese",
+//   "Nepali",
+//   "Norwegian",
+//   "Chichewa",
+//   "Odia",
+//   "Pashto",
+//   "Persian",
+//   "Polish",
+//   "Portuguese",
+//   "Punjabi",
+//   "Romanian",
+//   "Russian",
+//   "Serbian",
+//   "Sinhala",
+//   "Slovak",
+//   "Slovenian",
+//   "Spanish",
+//   "Sundanese",
+//   "Swahili",
+//   "Swedish",
+//   "Tamil",
+//   "Telugu",
+//   "Thai",
+//   "Turkish",
+//   "Ukrainian",
+//   "Urdu",
+//   "Vietnamese",
+//   "Welsh",
+//   "Xhosa",
+//   "Yiddish",
+//   "Zulu",
+// ];
 //
 //   final Map<String, List<Map<String, String>>> _phrases = {
 //     "Travel ✈️": [
@@ -319,15 +367,17 @@
 //     );
 //   }
 // }
-// lib/view/screens/phrasebook/phrasebook_screen.dart
-import 'dart:convert';
+// lib/view/screens/user_flow/phrasebook/phrasebook.dart
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
 
 import '../../../../gen/assets.gen.dart';
-import '../../../widgets/navigation.dart';
 import '../../../../app/routes/app_routes.dart';
+import '../../../widgets/navigation.dart';
+import '../../../../controllers/phrasebook_controller.dart';
+import '../../../../data/models/phrase_model.dart' hide Category;
+import '../../../../data/models/category_model.dart';
 
 class PhrasebookScreen extends StatefulWidget {
   const PhrasebookScreen({Key? key}) : super(key: key);
@@ -337,78 +387,8 @@ class PhrasebookScreen extends StatefulWidget {
 }
 
 class _PhrasebookScreenState extends State<PhrasebookScreen> {
+  final PhrasebookController _controller = Get.put(PhrasebookController());
   int _currentIndex = 3;
-
-  List<dynamic> _categories = [];
-  String? _selectedCategory;
-  List<dynamic> _phrases = [];
-
-  String _sourceLanguage = "English";
-  String _targetLanguage = "French";
-
-  final List<String> _languages = [
-    "English",
-    "Spanish",
-    "French",
-    "German",
-    "Hindi",
-    "Bengali",
-    "Afrikaans",
-    "Albanian",
-    "Amharic",
-    "Arabic",
-    "Armenian",
-    "Aymara",
-    "Azerbaijani",
-    "Bambara",
-    "Basque",
-    "Belarusian",
-    "Bhojpuri",
-    "Bosnian",
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchCategories();
-  }
-
-  Future<void> _fetchCategories() async {
-    try {
-      final response = await http.get(
-        Uri.parse("https://helpmespeak.onrender.com/api/category-names/"),
-      );
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          _categories = data;
-          if (_categories.isNotEmpty) {
-            _selectedCategory = _categories.first["id"].toString();
-            _fetchPhrases(_selectedCategory!);
-          }
-        });
-      }
-    } catch (e) {
-      debugPrint("Error fetching categories: $e");
-    }
-  }
-
-  Future<void> _fetchPhrases(String categoryId) async {
-    try {
-      final response = await http.get(
-        Uri.parse(
-            "https://helpmespeak.onrender.com/api/phrases/?category=$categoryId"),
-      );
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          _phrases = data;
-        });
-      }
-    } catch (e) {
-      debugPrint("Error fetching phrases: $e");
-    }
-  }
 
   void _onNavTap(int index) {
     setState(() => _currentIndex = index);
@@ -452,14 +432,12 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
             /// Topbar
             SafeArea(
               child: Padding(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   children: [
                     GestureDetector(
                       onTap: () => context.go(AppRoutes.home),
-                      child: Assets.icons.backwhite
-                          .image(width: 21, height: 21),
+                      child: Assets.icons.backwhite.image(width: 21, height: 21),
                     ),
                     const Spacer(),
                     const Text(
@@ -507,99 +485,66 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
                     Positioned(
                       top: 220,
                       right: -68,
-                      child:
-                      Assets.images.green.image(width: 320, height: 320),
+                      child: Assets.images.green.image(width: 320, height: 320),
                     ),
 
-                    SingleChildScrollView(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 40),
-                          const Text(
-                            "Browse categorized phrases for daily conversations",
-                            style: TextStyle(
-                              fontFamily: 'Roboto',
-                              fontSize: 14,
-                              color: Color(0xFF433B3B),
-                            ),
+                    Obx(() {
+                      if (_controller.isCategoriesLoading.value) {
+                        return const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(),
+                              SizedBox(height: 16),
+                              Text("Loading categories..."),
+                            ],
                           ),
-                          const SizedBox(height: 16),
+                        );
+                      }
 
-                          /// Language Selector
-                          _buildLanguageSelector(),
-                          const SizedBox(height: 16),
-
-                          /// Category Dropdown
-                          if (_categories.isNotEmpty)
-                            Container(
-                              padding:
-                              const EdgeInsets.symmetric(horizontal: 16),
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  value: _selectedCategory,
-                                  isExpanded: true,
-                                  icon: Assets.icons.dropdown
-                                      .image(width: 20, height: 20),
-                                  items: _categories
-                                      .map((c) => DropdownMenuItem(
-                                    value: c["id"].toString(),
-                                    child: Text(c["name"]),
-                                  ))
-                                      .toList(),
-                                  onChanged: (val) {
-                                    if (val != null) {
-                                      setState(() {
-                                        _selectedCategory = val;
-                                      });
-                                      _fetchPhrases(val);
-                                    }
-                                  },
-                                ),
+                      return SingleChildScrollView(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 40),
+                            const Text(
+                              "Browse categorized phrases for daily conversations",
+                              style: TextStyle(
+                                fontFamily: 'Roboto',
+                                fontSize: 14,
+                                color: Color(0xFF433B3B),
                               ),
                             ),
-                          const SizedBox(height: 20),
+                            const SizedBox(height: 16),
 
-                          /// Phrase list
-                          ..._phrases.map(
-                                (phrase) => Container(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    phrase["english_text"] ?? "",
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                            /// Language Selector (Source & Target)
+                            _buildLanguageSelector(),
+                            const SizedBox(height: 16),
+
+                            /// Category Dropdown
+                            _buildCategoryDropdown(),
+                            const SizedBox(height: 20),
+
+                            /// Loading indicator for phrases
+                            Obx(() {
+                              if (_controller.isLoading.value) {
+                                return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(20),
+                                    child: CircularProgressIndicator(),
                                   ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    phrase["french_text"] ?? "",
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            }),
+
+                            /// Phrase list
+                            _buildPhraseList(),
+                          ],
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -611,15 +556,13 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
   }
 
   Widget _buildLanguageSelector() {
-    return Container(
+    return Obx(() => Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       height: 52,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(color: Colors.black, blurRadius: 1),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 1)],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -628,40 +571,243 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
           Row(children: [
             const SizedBox(width: 8),
             DropdownButton<String>(
-              value: _sourceLanguage,
+              value: _controller.sourceLanguage.value,
               underline: const SizedBox(),
               icon: Assets.icons.dropdown.image(width: 20, height: 20),
-              items: _languages
-                  .map((lang) =>
-                  DropdownMenuItem(value: lang, child: Text(lang)))
+              items: _controller.availableLanguages
+                  .map((lang) => DropdownMenuItem(value: lang, child: Text(lang)))
                   .toList(),
               onChanged: (val) {
-                if (val != null) setState(() => _sourceLanguage = val);
+                if (val != null) {
+                  _controller.changeSourceLanguage(val);
+                }
               },
             ),
           ]),
 
           // Bidirectional Icon
-          Assets.icons.bidirection.image(width: 26, height: 26),
+          GestureDetector(
+            onTap: () => _controller.swapLanguages(),
+            child: Assets.icons.bidirection.image(width: 26, height: 26),
+          ),
 
           // Target Language
           Row(children: [
             DropdownButton<String>(
-              value: _targetLanguage,
+              value: _controller.targetLanguage.value,
               underline: const SizedBox(),
               icon: Assets.icons.dropdown.image(width: 20, height: 20),
-              items: _languages
-                  .map((lang) =>
-                  DropdownMenuItem(value: lang, child: Text(lang)))
+              items: _controller.availableLanguages
+                  .map((lang) => DropdownMenuItem(value: lang, child: Text(lang)))
                   .toList(),
               onChanged: (val) {
-                if (val != null) setState(() => _targetLanguage = val);
+                if (val != null) {
+                  _controller.changeTargetLanguage(val);
+                }
               },
             ),
             const SizedBox(width: 8),
           ]),
         ],
       ),
+    ));
+  }
+
+  Widget _buildCategoryDropdown() {
+    return Obx(() => Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: 50,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<Category>(
+          value: _controller.selectedCategory.value,
+          isExpanded: true,
+          icon: Assets.icons.dropdown.image(width: 20, height: 20),
+          hint: const Text("Select Category"),
+          items: _controller.categories
+              .map((category) => DropdownMenuItem(
+            value: category,
+            child: Text(category.name),
+          ))
+              .toList(),
+          onChanged: (category) {
+            if (category != null) {
+              _controller.changeCategory(category);
+            }
+          },
+        ),
+      ),
+    ));
+  }
+
+  Widget _buildPhraseList() {
+    return Obx(() {
+      // Show phrase languages if available (filtered results)
+      if (_controller.phraseLanguages.isNotEmpty) {
+        return _buildPhraseLanguagesList();
+      }
+
+      // Show regular phrases as fallback
+      if (_controller.phrases.isNotEmpty) {
+        return _buildRegularPhrasesList();
+      }
+
+      // Show empty state
+      if (!_controller.isLoading.value) {
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.all(40),
+            child: Column(
+              children: [
+                Icon(Icons.search_off, size: 64, color: Colors.grey),
+                SizedBox(height: 16),
+                Text(
+                  "No phrases found for the selected languages and category",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      return const SizedBox.shrink();
+    });
+  }
+
+  Widget _buildPhraseLanguagesList() {
+    return Column(
+      children: _controller.phraseLanguages.map((phraseLanguage) {
+        final sourceText = phraseLanguage.getTranslation(_controller.sourceLanguage.value);
+        final targetText = phraseLanguage.getTranslation(_controller.targetLanguage.value);
+
+        if (sourceText.isEmpty && targetText.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(color: Colors.grey.shade200, blurRadius: 4)
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (sourceText.isNotEmpty)
+                Text(
+                  sourceText,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              if (sourceText.isNotEmpty && targetText.isNotEmpty)
+                const SizedBox(height: 6),
+              if (targetText.isNotEmpty)
+                Text(
+                  targetText,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
+                ),
+            ],
+          ),
+        );
+      }).toList(),
     );
+  }
+
+  Widget _buildRegularPhrasesList() {
+    return Column(
+      children: _controller.phrases.map((phrase) {
+        final sourceText = _getTranslationFromPhrase(phrase, _controller.sourceLanguage.value);
+        final targetText = _getTranslationFromPhrase(phrase, _controller.targetLanguage.value);
+
+        if (sourceText.isEmpty && targetText.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(color: Colors.grey.shade200, blurRadius: 4)
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (sourceText.isNotEmpty)
+                Text(
+                  sourceText,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              if (sourceText.isNotEmpty && targetText.isNotEmpty)
+                const SizedBox(height: 6),
+              if (targetText.isNotEmpty)
+                Text(
+                  targetText,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
+                ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  String _getTranslationFromPhrase(Phrase phrase, String language) {
+    // Try exact match
+    if (phrase.translatedText.containsKey(language)) {
+      return phrase.translatedText[language]?.toString() ?? '';
+    }
+
+    // Try lowercase
+    String lowerLang = language.toLowerCase();
+    if (phrase.translatedText.containsKey(lowerLang)) {
+      return phrase.translatedText[lowerLang]?.toString() ?? '';
+    }
+
+    // Try common variations
+    Map<String, List<String>> languageVariations = {
+      'english': ['en', 'english_text'],
+      'spanish': ['es', 'spanish_text'],
+      'french': ['fr', 'french_text'],
+      'german': ['de', 'german_text'],
+      'bengali': ['bn', 'bengali_text'],
+      'arabic': ['ar', 'arabic_text'],
+    };
+
+    if (languageVariations.containsKey(lowerLang)) {
+      for (String variation in languageVariations[lowerLang]!) {
+        if (phrase.translatedText.containsKey(variation)) {
+          return phrase.translatedText[variation]?.toString() ?? '';
+        }
+      }
+    }
+
+    return '';
   }
 }

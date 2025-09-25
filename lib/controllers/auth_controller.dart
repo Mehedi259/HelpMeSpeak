@@ -283,7 +283,7 @@ class AuthController extends GetxController {
   // ============ Fetch User Data ===============
   Future<void> fetchUserData() async {
     try {
-      final data = await ApiService.getRequest(ApiConstants.home);
+      final data = await ApiService.getRequest(ApiConstants.profile);
 
       if (data != null && data is Map<String, dynamic>) {
         String profileImage = "";
