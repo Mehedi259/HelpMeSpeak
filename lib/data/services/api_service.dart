@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../../utils/storage_helper.dart';
 import '../../app/constants/api_constants.dart';
@@ -87,13 +88,19 @@ class ApiService {
   }
 
   /// =============================
-  /// Headers with Token
+  /// Headers with Token (JSON APIs only)
   /// =============================
   static Map<String, String> _headers(String? token) {
-    return {
+    final cleaned = token?.trim() ?? "";
+    final headers = <String, String>{
       "Content-Type": "application/json",
-      if (token != null && token.isNotEmpty) "Authorization": "Bearer $token",
     };
+
+    if (cleaned.isNotEmpty) {
+      headers["Authorization"] = "Bearer $cleaned";
+    }
+
+    return headers;
   }
 
   /// =============================
@@ -103,10 +110,57 @@ class ApiService {
     final statusCode = response.statusCode;
 
     if (statusCode >= 200 && statusCode < 305) {
-      return jsonDecode(response.body);
+      if (response.body.isNotEmpty) {
+        return jsonDecode(response.body);
+      } else {
+        return {};
+      }
     } else {
       throw Exception(
           "Error ${response.statusCode}: ${response.body}");
+    }
+  }
+
+  /// =============================
+  /// Multipart PUT request for file uploads
+  /// =============================
+  static Future<dynamic> putMultipartRequest(
+      String endpoint, {
+        Map<String, String>? fields,
+        Map<String, File>? files,
+      }) async {
+    try {
+      final token = await StorageHelper.getToken();
+      final uri = Uri.parse("${ApiConstants.baseUrl}$endpoint");
+
+      var request = http.MultipartRequest('PUT', uri);
+
+      // Add authorization header only (Content-Type auto handled)
+      final cleaned = token?.trim() ?? "";
+      if (cleaned.isNotEmpty) {
+        request.headers['Authorization'] = 'Bearer $cleaned';
+      }
+
+      // Add text fields
+      if (fields != null) {
+        request.fields.addAll(fields);
+      }
+
+      // Add files
+      if (files != null) {
+        for (var entry in files.entries) {
+          request.files.add(
+            await http.MultipartFile.fromPath(entry.key, entry.value.path),
+          );
+        }
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      return _processResponse(response);
+    } catch (e) {
+      throw Exception("Multipart PUT request error: $e");
     }
   }
 }

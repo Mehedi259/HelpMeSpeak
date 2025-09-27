@@ -42,6 +42,7 @@
 <!--    </queries>-->
 <!--</manifest>-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.helpmespeak"
     android:versionCode="1"
     android:versionName="1.0">
@@ -51,7 +52,9 @@
 
     <application
         android:label="helpmespeak"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        tools:ignore="ExtraText">
+        android:usesCleartextTraffic="true">
 
         <activity
             android:name=".MainActivity"
