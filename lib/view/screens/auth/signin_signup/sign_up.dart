@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../app/routes/app_routes.dart';
 import '../../../../controllers/auth_controller.dart';
 import '../../../widgets/button.dart';
 import '../../../widgets/input_field.dart';
@@ -71,7 +73,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       IconButton(
                           icon: const Icon(Icons.arrow_back_ios,
                               color: Colors.white, size: 20),
-                          onPressed: () => Navigator.of(context).pop()),
+                          onPressed: () => context.go(AppRoutes.singInsignUp)),
                       const Expanded(
                         child: Text(
                           "Sign up",

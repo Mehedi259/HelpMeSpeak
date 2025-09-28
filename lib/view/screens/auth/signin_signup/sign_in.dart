@@ -1,5 +1,7 @@
+import 'package:HelpMeSpeak/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../controllers/auth_controller.dart';
 import '../../../widgets/button.dart';
 import '../../../widgets/input_field.dart';
@@ -32,6 +34,21 @@ class _SignInScreenState extends State<SignInScreen> {
     authController.login(context, email, password, rememberMe: _rememberMe);
   }
 
+  void _handleForgotPassword() {
+     context.go(AppRoutes.forgetPassword);
+    print("Forgot password tapped");
+  }
+
+  void _handleGoogleSignIn() {
+    // Handle Google sign in
+    print("Google sign in tapped");
+  }
+
+  void _handleAppleSignIn() {
+    // Handle Apple sign in
+    print("Apple sign in tapped");
+  }
+
   @override
   Widget build(BuildContext context) {
     final authController = Get.find<AuthController>();
@@ -52,7 +69,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       IconButton(
                         icon: const Icon(Icons.arrow_back_ios,
                             color: Colors.white, size: 20),
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () => context.go(AppRoutes.singInsignUp),
                       ),
                       const Expanded(
                         child: Text(
@@ -81,6 +98,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          const SizedBox(height: 40),
                           InputField(
                             icon: Icons.email_outlined,
                             hint: "Email...",
@@ -101,29 +119,24 @@ class _SignInScreenState extends State<SignInScreen> {
                           ),
                           const SizedBox(height: 12),
 
-                          /// ✅ Remember Me Checkbox
-                          Row(
-                            children: [
-                              Checkbox(
-                                value: _rememberMe,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _rememberMe = value ?? false;
-                                  });
-                                },
-                                activeColor: Colors.blue,
-                              ),
-                              const Text(
-                                "Remember me",
+                          // Forgot Password Link
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: _handleForgotPassword,
+                              child: const Text(
+                                "Forgot password?",
                                 style: TextStyle(
+                                  color: Colors.blue,
                                   fontSize: 14,
-                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 20),
 
+                          // Sign In Button
                           Obx(() {
                             return CustomButton(
                               text: "Sign In",
@@ -131,6 +144,123 @@ class _SignInScreenState extends State<SignInScreen> {
                               onPressed: _handleSignIn,
                             );
                           }),
+
+                          const SizedBox(height: 30),
+
+                          // Divider with "Or" text
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  height: 1,
+                                  color: Colors.grey.shade300,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                child: Text(
+                                  "Or",
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Container(
+                                  height: 1,
+                                  color: Colors.grey.shade300,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // "Sign in with" text
+                          Center(
+                            child: Text(
+                              "Sign in with",
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Social Sign In Buttons
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Google Sign In
+                              GestureDetector(
+                                onTap: _handleGoogleSignIn,
+                                child: Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey,
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Center(
+                                    child: Image.asset(
+                                      "assets/icons/google.png",
+                                      width: 24,
+                                      height: 24,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width:20),
+                              // Apple Sign In
+                              GestureDetector(
+                                onTap: _handleAppleSignIn,
+                                child: Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey,
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.apple,
+                                      size: 24,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 40),
                         ],
                       ),
                     ),

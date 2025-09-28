@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:get/get.dart';
+import '../../../../controllers/otp_controller.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../../../widgets/opt_button.dart';
 
@@ -18,41 +19,28 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-  final TextEditingController otpController = TextEditingController();
+  final TextEditingController otpTextController = TextEditingController();
+  final otpController = Get.put(OtpController());
   bool isOtpComplete = false;
 
   @override
   void dispose() {
-    otpController.dispose();
+    otpTextController.dispose();
     super.dispose();
   }
 
   /// Handle verify code button press
   void _handleVerifyCode() {
     if (isOtpComplete) {
-      final code = otpController.text;
-
-      if (_isValidOtp(code)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Code verified successfully!')),
-        );
-        // Navigate to password reset screen
-         context.go(AppRoutes.newpassword);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid code. Please try again.')),
-        );
-      }
+      final code = otpTextController.text;
+      otpController.verifyResetOtp(context, widget.email, code);
     }
   }
 
   /// Handle resend code
   void _handleResendCode() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Code resent to ${widget.email}')),
-    );
-
-    otpController.clear();
+    otpController.resendOtp(context, widget.email);
+    otpTextController.clear();
     setState(() {
       isOtpComplete = false;
     });
@@ -61,11 +49,6 @@ class _OtpScreenState extends State<OtpScreen> {
   /// Navigate back
   void _handleBack() {
     context.go(AppRoutes.forgetPassword);
-  }
-
-  /// Validate OTP (example validation - replace with your logic)
-  bool _isValidOtp(String otp) {
-    return otp.length == 6;
   }
 
   @override
@@ -148,7 +131,7 @@ class _OtpScreenState extends State<OtpScreen> {
                           PinCodeTextField(
                             appContext: context,
                             length: 6,
-                            controller: otpController,
+                            controller: otpTextController,
                             keyboardType: TextInputType.number,
                             animationType: AnimationType.fade,
                             autoDisposeControllers: false,
@@ -183,7 +166,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
                           const SizedBox(height: 40),
 
-                          // Verify code button (New OptButton)
+                          // Verify code button
                           OptButton(
                             text: "Verify code",
                             isEnabled: isOtpComplete,

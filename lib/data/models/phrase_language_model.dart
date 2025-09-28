@@ -1,20 +1,22 @@
-// lib/data/models/phrase_language_model.dart
 class PhraseLanguage {
   final int id;
-  final Map<String, dynamic> translations;
+  final Map<String, String> translations;
   final String category;
 
-  PhraseLanguage({
+  const PhraseLanguage({
     required this.id,
     required this.translations,
     required this.category,
   });
 
   factory PhraseLanguage.fromJson(Map<String, dynamic> json) {
-    // Remove known non-language fields
-    Map<String, dynamic> translations = Map<String, dynamic>.from(json);
-    translations.remove('id');
-    translations.remove('category');
+
+    final Map<String, String> translations = {};
+    json.forEach((key, value) {
+      if (key != 'id' && key != 'category') {
+        translations[key.toLowerCase()] = value?.toString() ?? '';
+      }
+    });
 
     return PhraseLanguage(
       id: json['id'] ?? 0,
@@ -24,22 +26,11 @@ class PhraseLanguage {
   }
 
   String getTranslation(String language) {
-    // Try exact match first
-    if (translations.containsKey(language)) {
-      return translations[language] ?? '';
+    final key = language.toLowerCase();
+    if (translations.containsKey(key)) {
+      return translations[key] ?? '';
     }
-
-    // Try lowercase match
-    String lowerLang = language.toLowerCase();
-    if (translations.containsKey(lowerLang)) {
-      return translations[lowerLang] ?? '';
-    }
-
-    // Try first available translation as fallback
-    if (translations.isNotEmpty) {
-      return translations.values.first ?? '';
-    }
-
-    return '';
+    // fallback first value
+    return translations.values.isNotEmpty ? translations.values.first : '';
   }
 }

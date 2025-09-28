@@ -78,11 +78,17 @@ class AppPages {
       ),
       GoRoute(
         path: AppRoutes.otp,
-        builder: (context, state) => const OtpScreen(email: '',),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final email = extra?['email'] ?? '';
+          return OtpScreen(email: email);
+        },
       ),
       GoRoute(
         path: AppRoutes.newpassword,
-        builder: (context, state) => const CreateNewPasswordScreen(),
+        builder: (context, state) {
+          return const CreateNewPasswordScreen();
+        },
       ),
 
       GoRoute(

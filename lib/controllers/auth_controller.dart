@@ -53,7 +53,7 @@ class AuthController extends GetxController {
         } else if (res.containsKey("detail")) {
           message = res["detail"].toString();
         }
-              ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(message)),
         );
       }

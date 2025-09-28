@@ -1,13 +1,14 @@
 class ApiConstants {
-  // static const String baseUrl = "https://helpmespeak.onrender.com";
-  static const String baseUrl = "http://10.10.7.116:8000";
-  //static const String baseUrl = "http://127.0.0.1:8000";
-  //static const String baseUrl = "http://192.168.10.113:8000";
+
+  static const String baseUrl = "https://app.helpmespeak.app";
 
   // Auth
   static const String login = "/api/auth/login/";
   static const String signup = "/api/auth/register/";
   static const String otpVerify = "/api/auth/otp/verify/";
+  static const String forgotPassword = "/api/auth/password/forgot/";
+  static const String resetPasswordVerify = "/api/auth/password/reset/verify/";
+  static const String resetPasswordConfirm = "/api/auth/password/reset/confirm/";
 
   // Chat & Translate
   static const String chatbot = "/api/chat/";

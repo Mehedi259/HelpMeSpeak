@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:get/get.dart';
+import '../../../../controllers/forget_password_controller.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../../../widgets/button.dart';
 import '../../../widgets/input_field.dart';
@@ -15,6 +16,7 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   // Text controller
   final TextEditingController _emailController = TextEditingController();
+  final forgetPwdController = Get.put(ForgetPasswordController());
 
   @override
   void initState() {
@@ -46,13 +48,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       return;
     }
 
-    // Add your forgot password logic here
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Password reset code sent to $email')),
-    );
-
-    // Navigate to verification screen or back to sign in
-     context.go(AppRoutes.otp);
+    forgetPwdController.sendForgotPasswordEmail(context, email);
   }
 
   /// Navigate back to sign in
