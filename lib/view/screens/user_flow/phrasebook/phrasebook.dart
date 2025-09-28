@@ -6,13 +6,12 @@ import '../../../../gen/assets.gen.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../../../widgets/navigation.dart';
 import '../../../../controllers/phrasebook_controller.dart';
-import '../../../../data/models/phrase_model.dart' hide Category;
+import '../../../../data/models/phrase_model.dart';
 import '../../../../data/models/category_model.dart';
 
 class PhrasebookScreen extends StatefulWidget {
   const PhrasebookScreen({Key? key}) : super(key: key);
 
-  // Full language list as static const
   static const List<String> allLanguages = [
     "Afrikaans","Albanian","Arabic","Armenian","Bengali","Bosnian","Catalan","Croatian",
     "Czech","Danish","Dutch","English","Esperanto","Estonian","Finnish","French","German",
@@ -71,7 +70,6 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
         ),
         child: Column(
           children: [
-            /// Topbar
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -97,8 +95,6 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
                 ),
               ),
             ),
-
-            /// Main Container
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -111,25 +107,10 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
                 ),
                 child: Stack(
                   children: [
-                    Center(
-                      child: Assets.images.ai.image(width: 142, height: 142),
-                    ),
-                    Positioned(
-                      top: 252,
-                      right: 256,
-                      child: Assets.images.star.image(width: 71, height: 71),
-                    ),
-                    Positioned(
-                      top: 220,
-                      left: -68,
-                      child: Assets.images.pink.image(width: 320, height: 320),
-                    ),
-                    Positioned(
-                      top: 220,
-                      right: -68,
-                      child: Assets.images.green.image(width: 320, height: 320),
-                    ),
-
+                    Center(child: Assets.images.ai.image(width: 142, height: 142)),
+                    Positioned(top: 252, right: 256, child: Assets.images.star.image(width: 71, height: 71)),
+                    Positioned(top: 220, left: -68, child: Assets.images.pink.image(width: 320, height: 320)),
+                    Positioned(top: 220, right: -68, child: Assets.images.green.image(width: 320, height: 320)),
                     Obx(() {
                       if (_controller.isCategoriesLoading.value) {
                         return const Center(
@@ -159,16 +140,10 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
                               ),
                             ),
                             const SizedBox(height: 16),
-
-                            /// Language Selector (Source & Target)
                             _buildLanguageSelector(),
                             const SizedBox(height: 16),
-
-                            /// Category Dropdown
                             _buildCategoryDropdown(),
                             const SizedBox(height: 20),
-
-                            /// Loading indicator for phrases
                             Obx(() {
                               if (_controller.isLoading.value) {
                                 return const Center(
@@ -180,8 +155,6 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
                               }
                               return const SizedBox.shrink();
                             }),
-
-                            /// Phrase list
                             _buildPhraseList(),
                           ],
                         ),
@@ -209,7 +182,6 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Source Language
           Row(children: [
             const SizedBox(width: 8),
             DropdownButton<String>(
@@ -220,20 +192,14 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
                   .map((lang) => DropdownMenuItem(value: lang, child: Text(lang)))
                   .toList(),
               onChanged: (val) {
-                if (val != null) {
-                  _controller.changeSourceLanguage(val);
-                }
+                if (val != null) _controller.changeSourceLanguage(val);
               },
             ),
           ]),
-
-          // Bidirectional Icon
           GestureDetector(
             onTap: () => _controller.swapLanguages(),
             child: Assets.icons.bidirection.image(width: 26, height: 26),
           ),
-
-          // Target Language
           Row(children: [
             DropdownButton<String>(
               value: _controller.targetLanguage.value,
@@ -243,9 +209,7 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
                   .map((lang) => DropdownMenuItem(value: lang, child: Text(lang)))
                   .toList(),
               onChanged: (val) {
-                if (val != null) {
-                  _controller.changeTargetLanguage(val);
-                }
+                if (val != null) _controller.changeTargetLanguage(val);
               },
             ),
             const SizedBox(width: 8),
@@ -287,17 +251,18 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
 
   Widget _buildPhraseList() {
     return Obx(() {
-      // Show phrase languages if available (filtered results)
+      if (_controller.selectedCategory.value == null) {
+        return const SizedBox.shrink();
+      }
+
       if (_controller.phraseLanguages.isNotEmpty) {
         return _buildPhraseLanguagesList();
       }
 
-      // Show regular phrases as fallback
       if (_controller.phrases.isNotEmpty) {
         return _buildRegularPhrasesList();
       }
 
-      // Show empty state
       if (!_controller.isLoading.value) {
         return const Center(
           child: Padding(
@@ -329,45 +294,9 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
       children: _controller.phraseLanguages.map((phraseLanguage) {
         final sourceText = phraseLanguage.getTranslation(_controller.sourceLanguage.value);
         final targetText = phraseLanguage.getTranslation(_controller.targetLanguage.value);
+        if (sourceText.isEmpty && targetText.isEmpty) return const SizedBox.shrink();
 
-        if (sourceText.isEmpty && targetText.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(color: Colors.grey.shade200, blurRadius: 4)
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (sourceText.isNotEmpty)
-                Text(
-                  sourceText,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              if (sourceText.isNotEmpty && targetText.isNotEmpty)
-                const SizedBox(height: 6),
-              if (targetText.isNotEmpty)
-                Text(
-                  targetText,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
-                  ),
-                ),
-            ],
-          ),
-        );
+        return _buildPhraseCard(sourceText, targetText);
       }).toList(),
     );
   }
@@ -377,139 +306,45 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
       children: _controller.phrases.map((phrase) {
         final sourceText = _getTranslationFromPhrase(phrase, _controller.sourceLanguage.value);
         final targetText = _getTranslationFromPhrase(phrase, _controller.targetLanguage.value);
+        if (sourceText.isEmpty && targetText.isEmpty) return const SizedBox.shrink();
 
-        if (sourceText.isEmpty && targetText.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(color: Colors.grey.shade200, blurRadius: 4)
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (sourceText.isNotEmpty)
-                Text(
-                  sourceText,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              if (sourceText.isNotEmpty && targetText.isNotEmpty)
-                const SizedBox(height: 6),
-              if (targetText.isNotEmpty)
-                Text(
-                  targetText,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
-                  ),
-                ),
-            ],
-          ),
-        );
+        return _buildPhraseCard(sourceText, targetText);
       }).toList(),
     );
   }
 
+  Widget _buildPhraseCard(String sourceText, String targetText) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 4)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (sourceText.isNotEmpty)
+            Text(sourceText, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+          if (sourceText.isNotEmpty && targetText.isNotEmpty)
+            const SizedBox(height: 6),
+          if (targetText.isNotEmpty)
+            Text(targetText, style: const TextStyle(fontSize: 14, color: Colors.black54)),
+        ],
+      ),
+    );
+  }
+
   String _getTranslationFromPhrase(Phrase phrase, String language) {
-    // Exact match
     if (phrase.translatedText.containsKey(language)) {
       return phrase.translatedText[language]?.toString() ?? '';
     }
-
-    // Lowercase match
     String lowerLang = language.toLowerCase();
     if (phrase.translatedText.containsKey(lowerLang)) {
       return phrase.translatedText[lowerLang]?.toString() ?? '';
     }
-
-    // Language variations mapping
-    Map<String, List<String>> languageVariations = {
-      'afrikaans': ['af','afrikaans_text'],
-      'albanian': ['sq','albanian_text'],
-      'arabic': ['ar','arabic_text'],
-      'armenian': ['hy','armenian_text'],
-      'bengali': ['bn','bengali_text'],
-      'bosnian': ['bs','bosnian_text'],
-      'catalan': ['ca','catalan_text'],
-      'croatian': ['hr','croatian_text'],
-      'czech': ['cs','czech_text'],
-      'danish': ['da','danish_text'],
-      'dutch': ['nl','dutch_text'],
-      'english': ['en','english_text'],
-      'esperanto': ['eo','esperanto_text'],
-      'estonian': ['et','estonian_text'],
-      'finnish': ['fi','finnish_text'],
-      'french': ['fr','french_text'],
-      'german': ['de','german_text'],
-      'greek': ['el','greek_text'],
-      'gujarati': ['gu','gujarati_text'],
-      'hindi': ['hi','hindi_text'],
-      'hungarian': ['hu','hungarian_text'],
-      'icelandic': ['is','icelandic_text'],
-      'indonesian': ['id','indonesian_text'],
-      'italian': ['it','italian_text'],
-      'japanese': ['ja','japanese_text'],
-      'javanese': ['jv','javanese_text'],
-      'kannada': ['kn','kannada_text'],
-      'khmer': ['km','khmer_text'],
-      'korean': ['ko','korean_text'],
-      'latin': ['la','latin_text'],
-      'latvian': ['lv','latvian_text'],
-      'lithuanian': ['lt','lithuanian_text'],
-      'macedonian': ['mk','macedonian_text'],
-      'malayalam': ['ml','malayalam_text'],
-      'marathi': ['mr','marathi_text'],
-      'burmese': ['my','burmese_text'],
-      'nepali': ['ne','nepali_text'],
-      'norwegian': ['no','norwegian_text'],
-      'chichewa': ['ny','chichewa_text'],
-      'odia': ['or','odia_text'],
-      'pashto': ['ps','pashto_text'],
-      'persian': ['fa','persian_text'],
-      'polish': ['pl','polish_text'],
-      'portuguese': ['pt','portuguese_text'],
-      'punjabi': ['pa','punjabi_text'],
-      'romanian': ['ro','romanian_text'],
-      'russian': ['ru','russian_text'],
-      'serbian': ['sr','serbian_text'],
-      'sinhala': ['si','sinhala_text'],
-      'slovak': ['sk','slovak_text'],
-      'slovenian': ['sl','slovenian_text'],
-      'spanish': ['es','spanish_text'],
-      'sundanese': ['su','sundanese_text'],
-      'swahili': ['sw','swahili_text'],
-      'swedish': ['sv','swedish_text'],
-      'tamil': ['ta','tamil_text'],
-      'telugu': ['te','telugu_text'],
-      'thai': ['th','thai_text'],
-      'turkish': ['tr','turkish_text'],
-      'ukrainian': ['uk','ukrainian_text'],
-      'urdu': ['ur','urdu_text'],
-      'vietnamese': ['vi','vietnamese_text'],
-      'welsh': ['cy','welsh_text'],
-      'xhosa': ['xh','xhosa_text'],
-      'yiddish': ['yi','yiddish_text'],
-      'zulu': ['zu','zulu_text'],
-    };
-
-    if (languageVariations.containsKey(lowerLang)) {
-      for (String variation in languageVariations[lowerLang]!) {
-        if (phrase.translatedText.containsKey(variation)) {
-          return phrase.translatedText[variation]?.toString() ?? '';
-        }
-      }
-    }
-
     return '';
   }
 }
+

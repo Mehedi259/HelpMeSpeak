@@ -1,6 +1,6 @@
 // lib/data/services/phrasebook_service.dart
 import '../models/phrase_language_model.dart';
-import '../models/phrase_model.dart' hide Category;
+import '../models/phrase_model.dart';
 import '../models/category_model.dart';
 import '../services/api_service.dart';
 import '../../app/constants/api_constants.dart';

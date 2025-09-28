@@ -1,10 +1,11 @@
 class ApiConstants {
   // static const String baseUrl = "https://helpmespeak.onrender.com";
   static const String baseUrl = "http://10.10.7.116:8000";
-  //static const String baseUrl = "http://127.0.0.1:8000";
+  //static const String baseUrl = "https://api.taskmama.app";
   //static const String baseUrl = "http://192.168.10.113:8000";
 
   // Auth
+  //static const String login = "/user/api/v1/user/login/";
   static const String login = "/api/auth/login/";
   static const String signup = "/api/auth/register/";
   static const String otpVerify = "/api/auth/otp/verify/";

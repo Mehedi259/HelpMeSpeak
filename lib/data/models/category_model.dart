@@ -1,10 +1,9 @@
-// lib/data/models/category_model.dart
 class Category {
   final int id;
   final String name;
   final String icon;
 
-  Category({
+  const Category({
     required this.id,
     required this.name,
     required this.icon,
@@ -12,7 +11,7 @@ class Category {
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
-      id: json['id'],
+      id: json['id'] ?? 0,
       name: json['name'] ?? '',
       icon: json['icon'] ?? '',
     );
@@ -25,4 +24,7 @@ class Category {
       'icon': icon,
     };
   }
+
+  @override
+  String toString() => 'Category(id: $id, name: $name)';
 }
