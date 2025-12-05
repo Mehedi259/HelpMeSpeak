@@ -1,3 +1,6 @@
+// ==========================================
+// 6. lib/utils/storage_helper.dart
+// ==========================================
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageHelper {
@@ -6,7 +9,6 @@ class StorageHelper {
   /// Save Token
   static Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
-    // Trim whitespace/newlines before saving
     final safe = token.trim();
     await prefs.setString(_tokenKey, safe);
   }

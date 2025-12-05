@@ -2,11 +2,11 @@ import 'package:HelpMeSpeak/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../../../controllers/auth_controller.dart';
 import '../../../widgets/button.dart';
 import '../../../widgets/input_field.dart';
 import '../../../widgets/password_field.dart';
-
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key}) : super(key: key);
@@ -21,13 +21,22 @@ class _SignInScreenState extends State<SignInScreen> {
   bool _isPasswordVisible = false;
   bool _rememberMe = false;
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  /// ===== Handle Email/Password Sign In =====
   void _handleSignIn() {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Enter email and password")));
+        const SnackBar(content: Text("Please enter email and password")),
+      );
       return;
     }
 
@@ -35,19 +44,161 @@ class _SignInScreenState extends State<SignInScreen> {
     authController.login(context, email, password, rememberMe: _rememberMe);
   }
 
+  /// ===== Handle Forgot Password =====
   void _handleForgotPassword() {
-     context.go(AppRoutes.forgetPassword);
-    print("Forgot password tapped");
+    context.go(AppRoutes.forgetPassword);
   }
 
-  void _handleGoogleSignIn() {
-    // Handle Google sign in
-    print("Google sign in tapped");
+  /// ===== Handle Google Sign-In =====
+  void _handleGoogleSignIn() async {
+    final authController = Get.find<AuthController>();
+
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(color: Colors.white),
+      ),
+    );
+
+    try {
+      await authController.googleLogin(context);
+      // Navigation is handled inside googleLogin method
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context); // Close loading dialog
+      }
+    } catch (e) {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context); // Close loading dialog
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Google Sign-In failed: ${e.toString()}")),
+      );
+    }
   }
 
-  void _handleAppleSignIn() {
-    // Handle Apple sign in
-    print("Apple sign in tapped");
+  /// ===== Handle Apple Sign-In =====
+  void _handleAppleSignIn() async {
+    try {
+      // Check if Apple Sign In is available
+      final isAvailable = await SignInWithApple.isAvailable();
+      if (!isAvailable) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Apple Sign In is not available on this device"),
+          ),
+        );
+        return;
+      }
+
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        webAuthenticationOptions: WebAuthenticationOptions(
+          clientId: 'com.example.helpmespeak',
+          redirectUri: Uri.parse(
+            'https://api.helpmespeak.app/api/dj-rest-auth/apple/callback/',
+          ),
+        ),
+      );
+
+      final idToken = credential.identityToken;
+
+      if (idToken == null || idToken.isEmpty) {
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context); // Close loading dialog
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to retrieve Apple token")),
+        );
+        return;
+      }
+
+      // Get user info
+      final userIdentifier = credential.userIdentifier ?? "";
+      final email = credential.email ?? "";
+      final givenName = credential.givenName ?? "";
+      final familyName = credential.familyName ?? "";
+
+      print("✅ Apple Sign-in successful");
+      print("User ID: $userIdentifier");
+      print("Email: $email");
+      print("Given Name: $givenName");
+      print("Family Name: $familyName");
+
+      // If email is empty (repeat sign-in), use userIdentifier
+      final finalEmail = email.isNotEmpty ? email : userIdentifier;
+
+      final authController = Get.find<AuthController>();
+
+      await authController.appleLogin(
+        context,
+        idToken: idToken,
+        email: finalEmail,
+        givenName: givenName,
+        familyName: familyName,
+      );
+
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context); // Close loading dialog
+      }
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context); // Close loading dialog
+      }
+
+      String errorMessage = "Apple Sign-in failed";
+
+      switch (e.code) {
+        case AuthorizationErrorCode.canceled:
+          errorMessage = "Sign in was canceled";
+          break;
+        case AuthorizationErrorCode.failed:
+          errorMessage = "Sign in failed";
+          break;
+        case AuthorizationErrorCode.invalidResponse:
+          errorMessage = "Invalid response from Apple";
+          break;
+        case AuthorizationErrorCode.notHandled:
+          errorMessage = "Sign in was not handled";
+          break;
+        case AuthorizationErrorCode.notInteractive:
+          errorMessage = "Sign in is not interactive";
+          break;
+        case AuthorizationErrorCode.unknown:
+          errorMessage = "Unknown error occurred";
+          break;
+        default:
+          errorMessage = "An error occurred";
+      }
+
+      print("❌ Apple Sign-in error: ${e.code} - ${e.message}");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    } catch (e) {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context); // Close loading dialog
+      }
+
+      print("❌ Unexpected error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("An unexpected error occurred: $e")),
+      );
+    }
   }
 
   @override
@@ -57,19 +208,28 @@ class _SignInScreenState extends State<SignInScreen> {
     return Scaffold(
       body: Stack(
         children: [
+          // Background Image
           Positioned.fill(
-            child: Image.asset("assets/images/authbg.png", fit: BoxFit.cover),
+            child: Image.asset(
+              "assets/images/authbg.png",
+              fit: BoxFit.cover,
+            ),
           ),
+
           SafeArea(
             child: Column(
               children: [
+                // Header with Back Button
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back_ios,
-                            color: Colors.white, size: 20),
+                        icon: const Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                         onPressed: () => context.go(AppRoutes.singInsignUp),
                       ),
                       const Expanded(
@@ -77,22 +237,27 @@ class _SignInScreenState extends State<SignInScreen> {
                           "Sign in",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600),
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 40), // Balance the back button
                     ],
                   ),
                 ),
+
+                // Main Content Container
                 Expanded(
                   child: Container(
                     width: double.infinity,
                     margin: const EdgeInsets.only(top: 60),
                     decoration: const BoxDecoration(
                       color: Colors.white,
-                      borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(25)),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(25),
+                      ),
                     ),
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.all(24),
@@ -100,6 +265,8 @@ class _SignInScreenState extends State<SignInScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const SizedBox(height: 40),
+
+                          // Email Input Field
                           InputField(
                             icon: Icons.email_outlined,
                             hint: "Email...",
@@ -107,6 +274,8 @@ class _SignInScreenState extends State<SignInScreen> {
                             keyboardType: TextInputType.emailAddress,
                           ),
                           const SizedBox(height: 20),
+
+                          // Password Input Field
                           PasswordField(
                             icon: Icons.lock_outline,
                             hint: "Password...",
@@ -120,7 +289,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           ),
                           const SizedBox(height: 12),
 
-                          // Forgot Password Link
+                          // Forgot Password Button
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
@@ -145,7 +314,6 @@ class _SignInScreenState extends State<SignInScreen> {
                               onPressed: _handleSignIn,
                             );
                           }),
-
                           const SizedBox(height: 30),
 
                           // Divider with "Or" text
@@ -175,7 +343,6 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                             ],
                           ),
-
                           const SizedBox(height: 20),
 
                           // "Sign in with" text
@@ -188,14 +355,13 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 20),
 
-                          // Social Sign In Buttons
+                          // Social Sign-In Buttons (Google & Apple)
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              // Google Sign In
+                              // Google Sign-In Button
                               GestureDetector(
                                 onTap: _handleGoogleSignIn,
                                 child: Container(
@@ -210,7 +376,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.grey,
+                                        color: Colors.grey.withOpacity(0.3),
                                         spreadRadius: 1,
                                         blurRadius: 3,
                                         offset: const Offset(0, 1),
@@ -226,8 +392,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width:20),
-                              // Apple Sign In
+                              const SizedBox(width: 20),
+
+                              // Apple Sign-In Button
                               GestureDetector(
                                 onTap: _handleAppleSignIn,
                                 child: Container(
@@ -242,7 +409,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.grey,
+                                        color: Colors.grey.withOpacity(0.3),
                                         spreadRadius: 1,
                                         blurRadius: 3,
                                         offset: const Offset(0, 1),
@@ -252,7 +419,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   child: const Center(
                                     child: Icon(
                                       Icons.apple,
-                                      size: 24,
+                                      size: 28,
                                       color: Colors.black,
                                     ),
                                   ),
@@ -260,7 +427,6 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                             ],
                           ),
-
                           const SizedBox(height: 40),
                         ],
                       ),
