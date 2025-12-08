@@ -94,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Text(
                             user != null && user.fullName.isNotEmpty
                                 ? "Hello ${user.fullName}"
-                                : "Hello ...",
+                                : "Hello user",
                             style: const TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 20,

@@ -55,9 +55,8 @@ class AuthService {
     }
   }
 
-  /// ===== Apple Login ===== ✅ UPDATED
+  /// ===== Apple Login =====
   static Future<Map<String, dynamic>> appleLogin(Map<String, dynamic> body) async {
-    // Backend expects: id_token, full_name (combined), email
     final firstName = body["first_name"] ?? "";
     final lastName = body["last_name"] ?? "";
     final fullName = "$firstName $lastName".trim();
@@ -68,7 +67,6 @@ class AuthService {
       "email": body["email"]?.toString().isNotEmpty == true ? body["email"] : null,
     };
 
-    // Remove null values
     requestBody.removeWhere((key, value) => value == null);
 
     print("🍎 Apple Login Request Body: $requestBody");
@@ -85,25 +83,37 @@ class AuthService {
     }
   }
 
-  /// ===== Google Login =====
-  static Future<Map<String, dynamic>> googleLogin(String authCode) async {
+  /// ===== Google Login ===== ✅ ONLY EMAIL - NO ID TOKEN
+  static Future<Map<String, dynamic>> googleLogin(String email) async {
     final requestBody = {
-      "code": authCode,
+      "email": email,
     };
 
-    print("🔵 Google Login Request Body: $requestBody");
+    print("🔵 ===== GOOGLE LOGIN API CALL =====");
+    print("🔵 Endpoint: ${ApiConstants.baseUrl}${ApiConstants.googleLogin}");
+    print("🔵 Request Body: $requestBody");
 
-    final response = await ApiService.postRequest(
-      ApiConstants.googleLogin,
-      body: requestBody,
-    );
+    try {
+      final response = await ApiService.postRequest(
+        ApiConstants.googleLogin,
+        body: requestBody,
+      );
 
-    print("🔵 Google Login Response: $response");
+      print("📥 Response Type: ${response.runtimeType}");
+      print("📥 Response: $response");
 
-    if (response is Map<String, dynamic>) {
-      return response;
-    } else {
-      throw Exception("Unexpected Google login response: $response");
+      if (response is Map<String, dynamic>) {
+        return response;
+      } else if (response is List && response.isNotEmpty) {
+        print("⚠️ Response is List, taking first item");
+        return response[0] as Map<String, dynamic>;
+      } else {
+        print("❌ Unexpected response format");
+        throw Exception("Unexpected Google login response: $response");
+      }
+    } catch (e) {
+      print("❌ Google Login API Error: $e");
+      rethrow;
     }
   }
 }

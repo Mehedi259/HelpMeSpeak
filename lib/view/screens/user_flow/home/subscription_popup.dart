@@ -34,23 +34,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Optional top Skip button
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: TextButton(
-                      onPressed: () => context.go(AppRoutes.home),
-                      child: const Text(
-                        'Skip',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w300,
-                          fontSize: 14,
-                          color: Color(0xFF998888),
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 8),
                   const Center(
                     child: Text(
@@ -133,7 +116,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   CustomButton(
                     text: 'Subscribe',
                     onPressed: () {
-                      context.go(AppRoutes.subscriptionPayment);
+                      context.go(AppRoutes.home);
                     },
                   ),
                   const SizedBox(height: 24),

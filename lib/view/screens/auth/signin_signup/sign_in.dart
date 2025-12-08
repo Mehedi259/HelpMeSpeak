@@ -49,34 +49,27 @@ class _SignInScreenState extends State<SignInScreen> {
     context.go(AppRoutes.forgetPassword);
   }
 
-  /// ===== Handle Google Sign-In =====
+  /// ===== Handle Google Sign-In - UPDATED =====
   void _handleGoogleSignIn() async {
     final authController = Get.find<AuthController>();
 
-    // Show loading indicator
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(color: Colors.white),
-      ),
-    );
-
     try {
+      print("🔵 User tapped Google Sign-In button");
+
+      // Call the controller method directly
+      // No need to show loading dialog here as controller manages isLoading
       await authController.googleLogin(context);
-      // Navigation is handled inside googleLogin method
-      if (Navigator.canPop(context)) {
-        Navigator.pop(context); // Close loading dialog
-      }
+
     } catch (e) {
-      if (Navigator.canPop(context)) {
-        Navigator.pop(context); // Close loading dialog
+      print("❌ Error in _handleGoogleSignIn: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Google Sign-In failed: ${e.toString()}")),
+        );
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Google Sign-In failed: ${e.toString()}")),
-      );
     }
   }
+
 
   /// ===== Handle Apple Sign-In =====
   void _handleAppleSignIn() async {

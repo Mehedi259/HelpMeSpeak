@@ -23,22 +23,6 @@ class SignInSignUpScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          TextButton(
-            onPressed: () {
-              context.go(AppRoutes.signin);
-            },
-            child: const Text(
-              "Skip",
-              style: TextStyle(
-                fontFamily: "Poppins",
-                fontWeight: FontWeight.w400,
-                fontSize: 16,
-                color: Color(0xE52F2B2B),
-              ),
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -116,50 +100,6 @@ class SignInSignUpScreen extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              /// Secondary CTA - Sign Up with Google
-              Container(
-                width: double.infinity,
-                height: 55,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: const Color(0xCC838080),
-                    width: 1,
-                  ),
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
-                  onTap: () {
-                    context.go(AppRoutes.subscription);
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      /// Google Icon
-                      Assets.icons.google.image(
-                        width: 35,
-                        height: 35,
-                      ),
-                      const SizedBox(width: 8),
-
-                      /// Google SignUp Text
-                      const Text(
-                        "Sign Up With Google",
-                        style: TextStyle(
-                          fontFamily: "Inter",
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          letterSpacing: 0.5,
-                          color: Color(0xFF413D3D),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
               /// Already have an account? Sign-in
               GestureDetector(
                 onTap: () {
@@ -173,7 +113,7 @@ class SignInSignUpScreen extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: "Inter",
                           fontWeight: FontWeight.w500,
-                          fontSize: 14,
+                          fontSize: 12,
                           letterSpacing: 0.5,
                           color: Color(0xFF888888),
                         ),
@@ -183,7 +123,7 @@ class SignInSignUpScreen extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: "Inter",
                           fontWeight: FontWeight.w500,
-                          fontSize: 14,
+                          fontSize: 12,
                           letterSpacing: 0.5,
                           color: Color(0xFF048BC2),
                         ),

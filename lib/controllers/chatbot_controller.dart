@@ -112,11 +112,12 @@ class ChatController extends GetxController {
       } else {
         messages.add(ChatMessage(
           id: DateTime.now().toString(),
-          message: "Error: ${response.statusCode} ${response.body}",
+          message: "Type this format - How are you in Spanish",
           isUser: false,
           timestamp: DateTime.now(),
         ));
       }
+
     } catch (e) {
       messages.add(ChatMessage(
         id: DateTime.now().toString(),

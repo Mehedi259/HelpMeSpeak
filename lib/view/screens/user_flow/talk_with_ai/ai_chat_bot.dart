@@ -10,7 +10,6 @@ import '../../../widgets/navigation.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/routes/app_routes.dart';
 
-
 class AiChatBotScreen extends StatefulWidget {
   const AiChatBotScreen({Key? key}) : super(key: key);
 
@@ -35,9 +34,13 @@ class _AiChatBotScreenState extends State<AiChatBotScreen> {
   }
 
   Future<void> _initSpeech() async {
+    // Permission request
     var status = await Permission.microphone.request();
     if (status.isGranted) {
-      _speechAvailable = await _speech.initialize();
+      _speechAvailable = await _speech.initialize(
+        onStatus: (status) => print('Speech Status: $status'),
+        onError: (error) => print('Speech Error: $error'),
+      );
     } else {
       _speechAvailable = false;
       if (mounted) {
@@ -51,11 +54,16 @@ class _AiChatBotScreenState extends State<AiChatBotScreen> {
 
   void _listen() async {
     if (!_speechAvailable) return;
+
     if (!_isListening) {
       setState(() => _isListening = true);
-      _speech.listen(onResult: (result) {
-        setState(() => _messageController.text = result.recognizedWords);
-      });
+      _speech.listen(
+        onResult: (result) {
+          setState(() {
+            _messageController.text = result.recognizedWords;
+          });
+        },
+      );
     } else {
       setState(() => _isListening = false);
       _speech.stop();

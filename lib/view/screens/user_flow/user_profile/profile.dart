@@ -175,9 +175,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           const SizedBox(height: 50),
 
-                          /// Full Name
-                          _buildTextField("Full Name", profile?.fullName ?? "" ),
-                          const SizedBox(height: 16),
+                          // /// Full Name
+                          // _buildTextField("Full Name", profile?.fullName ?? "User" ),
+                          // const SizedBox(height: 16),
 
                           /// Email
                           _buildTextField("E-mail", profile?.email ?? "" ),

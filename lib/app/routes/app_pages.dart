@@ -1,8 +1,6 @@
 // lib/app/routes/app_pages.dart
 import 'package:go_router/go_router.dart';
 
-
-
 import '../../view/screens/auth/forget_password/forget_password.dart';
 import '../../view/screens/auth/forget_password/new_password.dart';
 import '../../view/screens/auth/forget_password/otp_screen.dart';
@@ -25,11 +23,11 @@ import '../../view/screens/user_flow/user_profile/profile.dart';
 import '../../view/screens/user_flow/talk_with_ai/ai_chat_bot.dart';
 import '../../view/screens/user_flow/instant_translation/instant_translation.dart';
 
-
 import 'app_routes.dart';
 
 class AppPages {
   static final GoRouter router = GoRouter(
+    initialLocation: AppRoutes.splash,
     routes: [
       GoRoute(
         path: AppRoutes.splash,
@@ -67,7 +65,6 @@ class AppPages {
           return AuthOtpScreen(email: email);
         },
       ),
-
       GoRoute(
         path: AppRoutes.subscription,
         builder: (context, state) => const SubscriptionScreen(),
@@ -90,7 +87,6 @@ class AppPages {
           return const CreateNewPasswordScreen();
         },
       ),
-
       GoRoute(
         path: AppRoutes.signup,
         builder: (context, state) => const SignUpScreen(),

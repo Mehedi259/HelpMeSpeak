@@ -1,3 +1,5 @@
+// lib/controllers/auth_controller.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -42,7 +44,7 @@ class AuthController extends GetxController {
           const SnackBar(content: Text("Login successful")),
         );
 
-        context.go(AppRoutes.home);
+        context.go(AppRoutes.subscription);
       } else {
         String message = "Login failed";
         if (res.containsKey("message")) {
@@ -207,7 +209,7 @@ class AuthController extends GetxController {
             const SnackBar(content: Text("Apple login successful")),
           );
 
-          context.go(AppRoutes.home);
+          context.go(AppRoutes.subscription);
         } else {
           print("❌ No access token in response");
           ScaffoldMessenger.of(context).showSnackBar(
@@ -230,24 +232,24 @@ class AuthController extends GetxController {
     }
   }
 
-
-  /// ===== Google Login =====
+  /// ===== Google Login ===== ✅ SIMPLE - ONLY EMAIL
   Future<void> googleLogin(BuildContext context) async {
+    GoogleSignIn? googleSignIn;
+
     try {
       isLoading.value = true;
 
       print("🔵 Starting Google Sign-In...");
 
-      // ✅ Initialize GoogleSignIn with proper configuration
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        scopes: <String>['email', 'profile'],
-        serverClientId: '123456789-abc123def456.apps.googleusercontent.com', // ⚠️ Replace with your Web Client ID
+      // Initialize GoogleSignIn
+      googleSignIn = GoogleSignIn(
+        scopes: ['email'],
       );
 
-      // Ensure clean state
+      // Sign out first to force account picker
       await googleSignIn.signOut();
 
-      // Initiate sign-in
+      // Start sign in
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
@@ -256,80 +258,95 @@ class AuthController extends GetxController {
         return;
       }
 
-      print("✅ Google user signed in: ${googleUser.email}");
+      final String email = googleUser.email;
+      print("✅ Google user signed in: $email");
 
-      // Get authentication details
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      // Get the server auth code (this is what backend needs)
-      final String? serverAuthCode = googleAuth.serverAuthCode;
-
-      if (serverAuthCode == null || serverAuthCode.isEmpty) {
-        print("❌ No server auth code received");
-
-        // Fallback: try using idToken if serverAuthCode is null
-        final String? idToken = googleAuth.idToken;
-
-        if (idToken == null || idToken.isEmpty) {
+      if (email.isEmpty) {
+        print("❌ Email is empty");
+        if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Failed to get Google authorization")),
+            const SnackBar(content: Text("Failed to get email from Google")),
           );
-          isLoading.value = false;
-          return;
         }
-
-        print("🔑 Using ID Token instead: $idToken");
-
-        // Send idToken to backend
-        final res = await AuthService.googleLogin(idToken);
-        _handleGoogleLoginResponse(context, res);
+        isLoading.value = false;
         return;
       }
 
-      print("🔑 Server Auth Code: $serverAuthCode");
+      print("📤 Sending email to backend: $email");
 
-      // Send to backend
-      final res = await AuthService.googleLogin(serverAuthCode);
-      _handleGoogleLoginResponse(context, res);
+      // Call backend API with only email
+      final res = await AuthService.googleLogin(email);
 
-    } catch (e) {
+      print("📥 Backend Response: $res");
+      print("📥 Response Keys: ${res.keys.toList()}");
+
+      // Check if success
+      if (res["success"] == true) {
+        print("✅ Backend returned success");
+
+        // Extract token
+        String? token;
+        if (res.containsKey("access")) {
+          token = res["access"]?.toString();
+          print("🔑 Found 'access' token");
+        } else if (res.containsKey("access_token")) {
+          token = res["access_token"]?.toString();
+          print("🔑 Found 'access_token' token");
+        } else if (res.containsKey("token")) {
+          token = res["token"]?.toString();
+          print("🔑 Found 'token' token");
+        }
+
+        if (token != null && token.trim().isNotEmpty) {
+          await StorageHelper.saveToken(token.trim());
+          print("🔐 Token saved successfully");
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Google login successful")),
+            );
+            context.go(AppRoutes.subscription);
+          }
+        } else {
+          print("❌ No access token in response");
+          print("📦 Full response: $res");
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("No access token received from server")),
+            );
+          }
+        }
+      } else {
+        print("❌ Backend returned success: false");
+        print("📦 Error message: ${res['message'] ?? res['error'] ?? 'Unknown error'}");
+
+        if (context.mounted) {
+          final errorMsg = res["message"]?.toString() ??
+              res["error"]?.toString() ??
+              "Google login failed";
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMsg)),
+          );
+        }
+      }
+    } catch (e, stackTrace) {
       print("❌ Google login error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: ${e.toString()}")),
-      );
+      print("📚 Stack trace: $stackTrace");
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${e.toString()}")),
+        );
+      }
     } finally {
+      // Clean up - disconnect Google Sign In
+      try {
+        await googleSignIn?.disconnect();
+      } catch (e) {
+        print("⚠️ Error disconnecting Google Sign In: $e");
+      }
+
       isLoading.value = false;
-    }
-  }
-
-  /// Helper method to handle Google login response
-  void _handleGoogleLoginResponse(BuildContext context, Map<String, dynamic> res) async {
-    print("📥 Google Login Response: $res");
-
-    // Handle response
-    String? token;
-    if (res.containsKey("access_token")) {
-      token = res["access_token"]?.toString();
-    } else if (res.containsKey("access")) {
-      token = res["access"]?.toString();
-    } else if (res.containsKey("token")) {
-      token = res["token"]?.toString();
-    }
-
-    if (token != null && token.trim().isNotEmpty) {
-      await StorageHelper.saveToken(token.trim());
-      print("🔐 Google token saved successfully");
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Google login successful")),
-      );
-
-      context.go(AppRoutes.home);
-    } else {
-      print("❌ No access token in response");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(res["message"] ?? "Google login failed")),
-      );
     }
   }
 

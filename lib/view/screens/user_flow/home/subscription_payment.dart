@@ -19,7 +19,7 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final double cardWidth = MediaQuery.of(context).size.width - 40; // 20px margin each side
+    final double cardWidth = MediaQuery.of(context).size.width - 40;
     return Scaffold(
       body: Stack(
         children: [

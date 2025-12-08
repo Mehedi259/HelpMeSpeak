@@ -1,6 +1,4 @@
-// ==========================================
-// 1. lib/app/constants/api_constants.dart
-// ==========================================
+// lib/app/constants/api_constants.dart
 class ApiConstants {
   static const String baseUrl = "https://api.helpmespeak.app";
 
@@ -14,7 +12,7 @@ class ApiConstants {
 
   // Social Auth
   static const String appleLogin = "/api/dj-rest-auth/apple/";
-  static const String googleLogin = "/api/auth/google/";
+  static const String googleLogin = "/api/auth/google/id-token/";
 
   // Chat & Translate
   static const String chatbot = "/api/chat/";
