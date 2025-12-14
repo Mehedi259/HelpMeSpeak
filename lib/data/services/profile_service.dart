@@ -1,6 +1,7 @@
-//lib/data/services/profile_service.dart
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import '../../app/constants/api_constants.dart';
 import '../services/api_service.dart';
 import '../models/profile_model.dart';
@@ -11,7 +12,8 @@ class ProfileService {
     final response = await ApiService.getRequest(ApiConstants.profile);
 
     if (response is List && response.isNotEmpty) {
-      return ProfileModel.fromJson(response[0]['user'] ?? response[0]);
+      final data = response[0];
+      return ProfileModel.fromJson(data['user'] ?? data);
     } else if (response is Map<String, dynamic>) {
       return ProfileModel.fromJson(response['user'] ?? response);
     } else {
@@ -19,63 +21,115 @@ class ProfileService {
     }
   }
 
+  /// ✅ Compress image before upload
+  static Future<Uint8List> _compressImage(dynamic imageSource) async {
+    Uint8List? imageBytes;
+
+    if (imageSource is File) {
+      imageBytes = await imageSource.readAsBytes();
+    } else if (imageSource is Uint8List) {
+      imageBytes = imageSource;
+    } else {
+      throw Exception("Invalid image source");
+    }
+
+    // Check if image needs compression (if > 500KB)
+    if (imageBytes.length > 500 * 1024) {
+      print("📦 Compressing image from ${imageBytes.length} bytes...");
+
+      final compressed = await FlutterImageCompress.compressWithList(
+        imageBytes,
+        minWidth: 800,
+        minHeight: 800,
+        quality: 70,
+      );
+
+      print("✅ Compressed to ${compressed.length} bytes");
+      return compressed;
+    }
+
+    return imageBytes;
+  }
+
   /// Update user profile with multipart support
   static Future<ProfileModel> updateProfile({
     required String fullName,
     String? gender,
-    String? phone, // Add phone parameter
+    String? phone,
     File? profileImage,
     Uint8List? profileImageBytes,
     required String token,
   }) async {
-    final fields = <String, String>{
-      'full_name': fullName,
-    };
+    try {
+      final fields = <String, String>{
+        'full_name': fullName,
+      };
 
-    if (gender != null && gender.isNotEmpty) {
-      fields['gender'] = gender;
-    }
+      // ✅ Add gender only if not empty
+      if (gender != null && gender.isNotEmpty) {
+        fields['gender'] = gender;
+      }
 
-    // Add phone field (required by your API based on curl command)
-    if (phone != null && phone.isNotEmpty) {
-      fields['phone'] = phone;
-    } else {
-      // Provide a default phone number if none provided
-      fields['phone'] = "+8801234567890";
-    }
+      // ✅ Add phone only if not empty
+      if (phone != null && phone.isNotEmpty) {
+        fields['phone'] = phone;
+      }
 
-    // CRITICAL FIX: Use correct field name 'image' instead of 'profile_image'
-    // Based on your curl command which uses 'image=@...'
-    Map<String, File>? files;
-    Map<String, Uint8List>? webFiles;
+      Map<String, File>? files;
+      Map<String, Uint8List>? webFiles;
 
-    if (kIsWeb && profileImageBytes != null) {
-      // Web platform - use bytes
-      webFiles = {'image': profileImageBytes}; // Changed from 'profile_image' to 'image'
-      print("🌐 Web: Adding image bytes (${profileImageBytes.length} bytes)");
-    } else if (!kIsWeb && profileImage != null) {
-      // Mobile platform - use file
-      files = {'image': profileImage}; // Changed from 'profile_image' to 'image'
-      print("📱 Mobile: Adding image file (${profileImage.path})");
-    }
+      // ✅ Handle image with compression
+      if (profileImage != null || profileImageBytes != null) {
+        print("📸 Processing profile image...");
 
-    print("📤 Sending fields: $fields");
-    print("📤 Has files: ${files?.isNotEmpty ?? false}");
-    print("📤 Has webFiles: ${webFiles?.isNotEmpty ?? false}");
+        final compressedBytes = await _compressImage(
+          profileImage ?? profileImageBytes,
+        );
 
-    final response = await ApiService.putMultipartRequest(
-      ApiConstants.profile,
-      fields: fields,
-      files: files,
-      webFiles: webFiles,
-    );
+        if (kIsWeb) {
+          // Web platform
+          webFiles = {'image': compressedBytes};
+          print("🌐 Web: Adding compressed image (${compressedBytes.length} bytes)");
+        } else {
+          // Mobile platform - create temp file from compressed bytes
+          final tempFile = File('${Directory.systemTemp.path}/temp_profile_${DateTime.now().millisecondsSinceEpoch}.jpg');
+          await tempFile.writeAsBytes(compressedBytes);
+          files = {'image': tempFile};
+          print("📱 Mobile: Adding compressed image file");
+        }
+      }
 
-    if (response is List && response.isNotEmpty) {
-      return ProfileModel.fromJson(response[0]['user'] ?? response[0]);
-    } else if (response is Map<String, dynamic>) {
-      return ProfileModel.fromJson(response['user'] ?? response);
-    } else {
-      throw Exception("Invalid update response format");
+      print("📤 Sending fields: $fields");
+      print("📤 Has files: ${files?.isNotEmpty ?? false}");
+      print("📤 Has webFiles: ${webFiles?.isNotEmpty ?? false}");
+
+      final response = await ApiService.putMultipartRequest(
+        ApiConstants.profile,
+        fields: fields,
+        files: files,
+        webFiles: webFiles,
+      );
+
+      // Clean up temp file if created
+      if (!kIsWeb && files != null) {
+        try {
+          await files['image']!.delete();
+        } catch (e) {
+          print("⚠️ Could not delete temp file: $e");
+        }
+      }
+
+      if (response is List && response.isNotEmpty) {
+        final data = response[0];
+        return ProfileModel.fromJson(data['user'] ?? data);
+      } else if (response is Map<String, dynamic>) {
+        return ProfileModel.fromJson(response['user'] ?? response);
+      } else {
+        throw Exception("Invalid update response format");
+      }
+    } catch (e) {
+      print("❌ Profile update error: $e");
+      rethrow;
     }
   }
 }

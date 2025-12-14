@@ -1,3 +1,4 @@
+//lib/data/models/user_model.dart
 class UserModel {
   final String email;
   final String fullName;

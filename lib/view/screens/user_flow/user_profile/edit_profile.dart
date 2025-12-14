@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../gen/assets.gen.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../../../../controllers/profile_controller.dart';
+import '../../../../utils/storage_helper.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({Key? key}) : super(key: key);
@@ -16,7 +17,6 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-
   // Mobile image
   File? _profileImage;
   // Web image
@@ -27,20 +27,75 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   // GetX Controller
   final ProfileController _profileController = Get.put(ProfileController());
 
-  // Gender selection
+  // Gender selection (NEW - for SharedPreferences only)
   String _selectedGender = 'male';
+
+  // Date of Birth (NEW - for SharedPreferences only)
+  DateTime? _selectedDateOfBirth;
+  final TextEditingController _dobController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // FIXED: Proper async loading without setState during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _profileController.loadUserProfile();
+      _loadLocalData();
     });
   }
 
+  /// Load Gender & DOB from SharedPreferences
+  Future<void> _loadLocalData() async {
+    final gender = await StorageHelper.getGender();
+    final dob = await StorageHelper.getDateOfBirth();
 
-  /// FIXED: Pick image from gallery or camera with Web support
+    if (gender != null && gender.isNotEmpty) {
+      setState(() {
+        _selectedGender = gender;
+      });
+    }
+
+    if (dob != null && dob.isNotEmpty) {
+      setState(() {
+        _dobController.text = dob;
+        try {
+          _selectedDateOfBirth = DateTime.parse(dob);
+        } catch (e) {
+          print("Error parsing date: $e");
+        }
+      });
+    }
+  }
+
+  /// Pick Date of Birth
+  Future<void> _pickDateOfBirth() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDateOfBirth ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.blue.shade700,
+              onPrimary: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDateOfBirth = picked;
+        // Format: DD/MM/YYYY
+        _dobController.text = "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+      });
+    }
+  }
+
+  /// Pick image from gallery or camera with Web support
   Future<void> _pickImage() async {
     showModalBottomSheet(
       context: context,
@@ -60,19 +115,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                   if (pickedFile != null) {
                     if (kIsWeb) {
-                      // Web platform - use bytes
                       _profileImageBytes = await pickedFile.readAsBytes();
                       setState(() {});
-
                       await _profileController.updateProfileImage(
-                        null, // No File for web
+                        null,
                         webImageBytes: _profileImageBytes,
                       );
                     } else {
-                      // Mobile platform - use File
                       _profileImage = File(pickedFile.path);
                       setState(() {});
-
                       await _profileController.updateProfileImage(_profileImage);
                     }
                   }
@@ -90,19 +141,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                   if (pickedFile != null) {
                     if (kIsWeb) {
-                      // Web platform - use bytes
                       _profileImageBytes = await pickedFile.readAsBytes();
                       setState(() {});
-
                       await _profileController.updateProfileImage(
                         null,
                         webImageBytes: _profileImageBytes,
                       );
                     } else {
-                      // Mobile platform - use File
                       _profileImage = File(pickedFile.path);
                       setState(() {});
-
                       await _profileController.updateProfileImage(_profileImage);
                     }
                   }
@@ -115,17 +162,42 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  /// FIXED: Save profile changes with Web support
+  /// Save profile changes
   Future<void> _saveChanges() async {
+    // 1. Save to backend (name & profile image - existing functionality)
     await _profileController.updateProfile(
       fullName: _profileController.fullNameController.text,
-      gender: _selectedGender,
+      gender: _selectedGender, // This might go to backend based on your existing code
       profileImage: kIsWeb ? null : _profileImage,
       profileImageBytes: kIsWeb ? _profileImageBytes : null,
     );
+
+    // 2. Save Gender & DOB to SharedPreferences only (NEW)
+    await StorageHelper.saveGender(_selectedGender);
+    if (_dobController.text.isNotEmpty) {
+      await StorageHelper.saveDateOfBirth(_dobController.text);
+    }
+
+    // 3. Show success message
+    if (mounted) {
+      Get.snackbar(
+        "Success",
+        "Profile updated successfully",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.shade100,
+        colorText: Colors.black87,
+        duration: const Duration(seconds: 2),
+      );
+    }
+
+    // 4. Navigate to Profile screen after saving
+    if (mounted) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      context.go(AppRoutes.profile);
+    }
   }
 
-  /// FIXED: Get profile image provider with proper Web support
+  /// Get profile image provider with proper Web support
   ImageProvider _getProfileImage() {
     if (kIsWeb && _profileImageBytes != null) {
       return MemoryImage(_profileImageBytes!);
@@ -195,17 +267,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     );
                   }
 
-                  // FIXED: Set gender without causing build issues
-                  if (_profileController.user?.gender != null &&
-                      _profileController.user!.gender!.isNotEmpty &&
-                      _selectedGender != _profileController.user!.gender!) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      setState(() {
-                        _selectedGender = _profileController.user!.gender!;
-                      });
-                    });
-                  }
-
                   return SingleChildScrollView(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -213,6 +274,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const SizedBox(height: 20),
+
+                          // Profile Picture (existing)
                           Center(
                             child: Stack(
                               children: [
@@ -244,18 +307,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             ),
                           ),
                           const SizedBox(height: 30),
+
+                          // Full Name (existing - goes to backend)
                           _buildEditableTextField(
                             "Full Name",
                             _profileController.fullNameController,
                           ),
                           const SizedBox(height: 20),
-                          _buildReadOnlyTextField(
-                            "Email",
-                            _profileController.emailController,
-                          ),
+
+                          // Gender Selection (NEW - SharedPreferences only)
+                          _buildGenderSelection(),
                           const SizedBox(height: 20),
-                          //_buildGenderSelection(),
+
+                          // Date of Birth Picker (NEW - SharedPreferences only)
+                          _buildDateOfBirthPicker(),
                           const SizedBox(height: 40),
+
+                          // Save Button
                           Center(
                             child: Obx(() => ElevatedButton(
                               onPressed: _profileController.isUpdating.value ? null : _saveChanges,
@@ -299,6 +367,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  // Existing method - Editable TextField (for name - goes to backend)
   Widget _buildEditableTextField(String label, TextEditingController controller) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -329,6 +398,100 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   color: Colors.grey.shade600,
                 ),
                 border: InputBorder.none,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // NEW - Gender Selection Dropdown (SharedPreferences only)
+  Widget _buildGenderSelection() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Gender",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _selectedGender,
+                isExpanded: true,
+                icon: Icon(Icons.arrow_drop_down, color: Colors.grey.shade600),
+                items: const [
+                  DropdownMenuItem(value: 'male', child: Text('Male')),
+                  DropdownMenuItem(value: 'female', child: Text('Female')),
+                  DropdownMenuItem(value: 'other', child: Text('Other')),
+                ],
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _selectedGender = newValue;
+                    });
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // NEW - Date of Birth Picker (SharedPreferences only)
+  Widget _buildDateOfBirthPicker() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Date of Birth",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 6),
+          GestureDetector(
+            onTap: _pickDateOfBirth,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _dobController.text.isEmpty ? "Select Date" : _dobController.text,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: _dobController.text.isEmpty ? Colors.grey.shade600 : Colors.black87,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.calendar_today, color: Colors.grey.shade600, size: 20),
+                ],
               ),
             ),
           ),
@@ -371,7 +534,4 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
     );
   }
-
-
 }
-

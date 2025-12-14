@@ -21,10 +21,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   int _currentIndex = 4;
 
+  // Local data from SharedPreferences (NEW)
+  String? _localGender;
+  String? _localDateOfBirth;
+
   @override
   void initState() {
     super.initState();
     _profileController.fetchProfile();
+    _loadLocalData();
+  }
+
+  /// Load Gender & DOB from SharedPreferences (NEW)
+  Future<void> _loadLocalData() async {
+    final gender = await StorageHelper.getGender();
+    final dob = await StorageHelper.getDateOfBirth();
+
+    setState(() {
+      _localGender = gender;
+      _localDateOfBirth = dob;
+    });
   }
 
   void _onNavTap(int index) {
@@ -49,15 +65,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _signOut(BuildContext context) async {
-    // 1️⃣ Clear token from SharedPreferences
+    // Clear token from SharedPreferences
     await StorageHelper.clearToken();
 
-    // 2️⃣ Navigate to Login screen
+    // Also clear gender & DOB (NEW)
+    await StorageHelper.clearGender();
+    await StorageHelper.clearDateOfBirth();
+
     if (context.mounted) {
       context.go(AppRoutes.signin);
     }
 
-    // 3️⃣ Optional: Show Snackbar
     Get.snackbar(
       "Signed Out",
       "You have been logged out successfully",
@@ -140,7 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           const SizedBox(height: 20),
 
-                          /// Profile Picture
+                          /// Profile Picture (existing - from backend)
                           Center(
                             child: CircleAvatar(
                               radius: 60,
@@ -152,10 +170,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           const SizedBox(height: 30),
 
+                          /// Full Name (existing - from backend)
+                          if (profile != null && profile.fullName.isNotEmpty) ...[
+                            _buildTextField("Full Name", profile.fullName),
+                            const SizedBox(height: 20),
+                          ],
+
+                          /// Gender (NEW - from SharedPreferences)
+                          if (_localGender != null && _localGender!.isNotEmpty) ...[
+                            _buildTextField(
+                              "Gender",
+                              _localGender!.substring(0, 1).toUpperCase() +
+                                  _localGender!.substring(1),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+
+                          /// Date of Birth (NEW - from SharedPreferences)
+                          if (_localDateOfBirth != null && _localDateOfBirth!.isNotEmpty) ...[
+                            _buildTextField("Date of Birth", _localDateOfBirth!),
+                            const SizedBox(height: 20),
+                          ],
+
+                          const SizedBox(height: 30),
+
                           /// Edit Profile Button
                           Center(
                             child: ElevatedButton(
-                              onPressed: () => context.go(AppRoutes.editProfile),
+                              onPressed: () async {
+                                await context.push(AppRoutes.editProfile);
+                                // Reload local data after returning from edit screen
+                                _loadLocalData();
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue.shade700,
                                 padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
@@ -173,15 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 50),
-
-                          // /// Full Name
-                          // _buildTextField("Full Name", profile?.fullName ?? "User" ),
-                          // const SizedBox(height: 16),
-
-                          /// Email
-                          _buildTextField("E-mail", profile?.email ?? "" ),
-                          const SizedBox(height: 30),
+                          const SizedBox(height: 20),
 
                           /// Sign Out Button
                           Center(
@@ -203,7 +241,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ),
                             ),
-
                           ),
                           const SizedBox(height: 30),
                         ],
@@ -219,7 +256,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  /// Reusable TextField
+  /// Reusable TextField (existing)
   Widget _buildTextField(String label, String value) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -255,4 +292,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-

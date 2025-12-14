@@ -2,11 +2,45 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>This app requires microphone access to capture your voice.</string>
 
+    <!-- Camera Permission -->
+    <key>NSCameraUsageDescription</key>
+    <string>This app needs access to your camera to capture photos for your profile and posts.</string>
+
+    <!-- Photo Library Permissions -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>This app needs access to your photo library to select images for your profile and posts.</string>
+
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>This app needs permission to save images to your photo library.</string>
+
+    <!-- Microphone Permission -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app requires microphone access to capture your voice for speech recognition and communication features.</string>
+
+    <!-- Speech Recognition Permission -->
     <key>NSSpeechRecognitionUsageDescription</key>
-    <string>This app needs speech recognition to convert your speech into text.</string>
+    <string>This app needs speech recognition to convert your speech into text and help you communicate better.</string>
+
+    <!-- User Tracking (if using analytics like Firebase, Facebook, etc.) -->
+    <key>NSUserTrackingUsageDescription</key>
+    <string>We use tracking to provide you with personalized content and improve your experience.</string>
+
+    <!-- Privacy Manifest -->
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array>
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <string>C617.1</string>
+            </array>
+        </dict>
+    </array>
+
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
 
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
@@ -34,6 +68,8 @@
     <string>LaunchScreen</string>
     <key>UIMainStoryboardFile</key>
     <string>Main</string>
+
+    <!-- Orientations -->
     <key>UISupportedInterfaceOrientations</key>
     <array>
         <string>UIInterfaceOrientationPortrait</string>
@@ -47,24 +83,27 @@
         <string>UIInterfaceOrientationLandscapeLeft</string>
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-<!-- Google Sign-In URL Scheme -->
-<key>CFBundleURLTypes</key>
-<array>
-    <dict>
-        <key>CFBundleTypeRole</key>
-        <string>Editor</string>
-        <key>CFBundleURLSchemes</key>
-        <array>
-            <string>com.googleusercontent.apps.189239658265-r6gmo6bt7sor00m25832d64s2as2gof7</string>
-        </array>
-    </dict>
-</array>
 
-<key>GIDClientID</key>
-<string>189239658265-r6gmo6bt7sor00m25832d64s2as2gof7.apps.googleusercontent.com</string>
+    <key>CADisableMinimumFrameDurationOnPhone</key>
+    <true/>
+    <key>UIApplicationSupportsIndirectInputEvents</key>
+    <true/>
+
+    <!-- Google Sign-In -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+              <string>com.googleusercontent.apps.189239658265-r6gmo6bt7sor00m25832d64s2as2gof7</string>
+            </array>
+        </dict>
+    </array>
+
+    <key>GIDClientID</key>
+    <string>189239658265-r6gmo6bt7sor00m25832d64s2as2gof7.apps.googleusercontent.com</string>
+
 </dict>
 </plist>

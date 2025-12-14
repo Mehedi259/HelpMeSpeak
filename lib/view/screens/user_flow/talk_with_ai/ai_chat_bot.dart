@@ -34,30 +34,48 @@ class _AiChatBotScreenState extends State<AiChatBotScreen> {
   }
 
   Future<void> _initSpeech() async {
-    // Permission request
-    var status = await Permission.microphone.request();
-    if (status.isGranted) {
-      _speechAvailable = await _speech.initialize(
-        onStatus: (status) => print('Speech Status: $status'),
-        onError: (error) => print('Speech Error: $error'),
-      );
-    } else {
-      _speechAvailable = false;
+    // Request microphone permission
+    var mic = await Permission.microphone.request();
+    var speech = await Permission.speech.request();
+
+    if (mic.isDenied || speech.isDenied) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Microphone permission denied")),
+          const SnackBar(content: Text("Microphone or Speech permission denied")),
         );
       }
+      return;
     }
+
+    // iOS requires this delay before initialize()
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    _speechAvailable = await _speech.initialize(
+      onStatus: (status) => print("Speech Status: $status"),
+      onError: (error) => print("Speech Error: $error"),
+    );
+
+    if (!_speechAvailable) {
+      print("❌ Speech not available. Check iOS permissions.");
+    }
+
     setState(() {});
   }
 
+
+
   void _listen() async {
-    if (!_speechAvailable) return;
+    if (!_speechAvailable) {
+      print("❌ Speech not available");
+      return;
+    }
 
     if (!_isListening) {
       setState(() => _isListening = true);
-      _speech.listen(
+
+      await _speech.listen(
+        listenMode: stt.ListenMode.deviceDefault,
+        partialResults: true,
         onResult: (result) {
           setState(() {
             _messageController.text = result.recognizedWords;
@@ -66,9 +84,10 @@ class _AiChatBotScreenState extends State<AiChatBotScreen> {
       );
     } else {
       setState(() => _isListening = false);
-      _speech.stop();
+      await _speech.stop();
     }
   }
+
 
   void _sendMessage() async {
     final text = _messageController.text.trim();

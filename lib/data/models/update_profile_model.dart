@@ -1,4 +1,4 @@
-// lib/data/models/profile_model.dart
+//lib/data/models/update_profile_model.dart
 class ProfileModel {
   final int id;
   final String email;
