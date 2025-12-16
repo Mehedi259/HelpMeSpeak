@@ -1,3 +1,5 @@
+// android/app/build.gradle.kts
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -32,7 +34,7 @@ import java.util.Properties
 
             defaultConfig {
                 applicationId = "com.example.helpmespeak"
-                minSdk = flutter.minSdkVersion
+                minSdk = 21  // Required for in_app_purchase
                 targetSdk = flutter.targetSdkVersion
                 versionCode = flutter.versionCode
                 versionName = flutter.versionName
@@ -66,4 +68,10 @@ import java.util.Properties
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Google Play Billing Library (for in-app purchases)
+    implementation("com.android.billingclient:billing:6.1.0")
+    implementation("com.android.billingclient:billing-ktx:6.1.0")
 }

@@ -5,7 +5,7 @@ import 'app/routes/app_pages.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  Get.put(AuthController()); // AuthController globally available
+  Get.put(AuthController());
   runApp(const HelpMeSpeakApp());
 }
 

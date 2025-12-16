@@ -35,12 +35,6 @@ dependencies:
   # OTP Verification
   flutter_verification_code: ^1.1.7
 
-  # Firebase Core
-  #firebase_core: ^3.5.0
-
-  # Firebase Authentication
-  #firebase_auth: ^5.3.0
-
   # Google Sign-In
   google_sign_in: ^6.2.1
 
@@ -58,6 +52,14 @@ dependencies:
   audioplayers: ^6.5.1
   image_picker: ^1.2.0
   flutter_image_compress: ^2.4.0
+
+  # Local Storage
+  shared_preferences: ^2.3.3
+
+  # In-App Purchase (FIXED VERSIONS)
+  in_app_purchase: ^3.2.0
+  in_app_purchase_storekit: ^0.3.17+3
+  in_app_purchase_android: ^0.4.0+8
 
 dev_dependencies:
   flutter_test:
@@ -81,8 +83,6 @@ flutter_launcher_icons:
   image_path_android: "assets/icons/app_icon.png"
   adaptive_icon_background: "assets/icons/icon_bg.png"
   adaptive_icon_foreground: "assets/icons/icon_fg.png"
-
-
 
 flutter:
   uses-material-design: true

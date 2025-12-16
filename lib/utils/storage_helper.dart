@@ -1,3 +1,5 @@
+// lib/utils/storage_helper.dart
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageHelper {
@@ -5,6 +7,8 @@ class StorageHelper {
   static const String _refreshTokenKey = "refresh_token";
   static const String _genderKey = "user_gender";
   static const String _dateOfBirthKey = "user_date_of_birth";
+  static const String _subscriptionStatusKey = "subscription_status";
+  static const String _isPaidUserKey = "is_paid_user";
 
   /// Save Access Token
   static Future<void> saveToken(String token) async {
@@ -67,7 +71,7 @@ class StorageHelper {
   }
 
   // ==========================================
-  // NEW: Gender & Date of Birth Methods
+  // Gender & Date of Birth Methods
   // ==========================================
 
   /// Save Gender
@@ -110,11 +114,50 @@ class StorageHelper {
     print("🗑️ Date of Birth cleared");
   }
 
-  /// Clear All User Data (including gender & DOB)
+  // ==========================================
+  // NEW: Subscription Status Methods
+  // ==========================================
+
+  /// Save Subscription Status
+  static Future<void> saveSubscriptionStatus(String status) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_subscriptionStatusKey, status);
+    print("💾 Subscription status saved: $status");
+  }
+
+  /// Get Subscription Status
+  static Future<String?> getSubscriptionStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_subscriptionStatusKey);
+  }
+
+  /// Save Paid User Status
+  static Future<void> saveIsPaidUser(bool isPaid) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_isPaidUserKey, isPaid);
+    print("💾 Paid user status saved: $isPaid");
+  }
+
+  /// Get Paid User Status
+  static Future<bool> getIsPaidUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_isPaidUserKey) ?? false;
+  }
+
+  /// Clear Subscription Data
+  static Future<void> clearSubscriptionData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_subscriptionStatusKey);
+    await prefs.remove(_isPaidUserKey);
+    print("🗑️ Subscription data cleared");
+  }
+
+  /// Clear All User Data (including gender, DOB, and subscription)
   static Future<void> clearAllUserData() async {
     await clearAllTokens();
     await clearGender();
     await clearDateOfBirth();
+    await clearSubscriptionData();
     print("🗑️ All user data cleared");
   }
 }

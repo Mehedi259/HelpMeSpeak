@@ -1,17 +1,22 @@
+<!-- android/app/src/main/AndroidManifest.xml -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.helpmespeak"
     android:versionCode="1"
     android:versionName="1.0">
 
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- In-App Purchase Permission (REQUIRED) -->
+    <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
         android:label="HelpMeSpeak"
         android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true"
         tools:ignore="ExtraText">
-        android:usesCleartextTraffic="true">
 
         <activity
             android:name=".MainActivity"

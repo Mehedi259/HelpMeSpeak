@@ -105,5 +105,16 @@
     <key>GIDClientID</key>
     <string>189239658265-r6gmo6bt7sor00m25832d64s2as2gof7.apps.googleusercontent.com</string>
 
+    <!-- ============================================== -->
+    <!-- In-App Purchase Support (StoreKit)             -->
+    <!-- ============================================== -->
+    <!-- Note: In-App Purchase capability must be enabled in Xcode:
+         1. Open Runner.xcworkspace
+         2. Select Runner target
+         3. Go to "Signing & Capabilities"
+         4. Click "+ Capability"
+         5. Add "In-App Purchase"
+    -->
+
 </dict>
 </plist>

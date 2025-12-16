@@ -1,3 +1,5 @@
+// lib/features/instant_translation/presentation/screens/instant_translation_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../utils/audio_player_helper.dart';
@@ -16,11 +18,14 @@ class InstantTranslationScreen extends StatefulWidget {
       _InstantTranslationScreenState();
 }
 
-class _InstantTranslationScreenState extends State<InstantTranslationScreen> {
+class _InstantTranslationScreenState extends State<InstantTranslationScreen>
+    with WidgetsBindingObserver {  // ✅ Lifecycle observer added
   int _currentIndex = 1;
   late stt.SpeechToText _speech;
   bool _isListening = false;
   String _inputText = "";
+  String _displayedSourceText = ""; // To show in source language box
+  final TextEditingController _textController = TextEditingController();
 
   /// Language state
   String _sourceLanguage = "English";
@@ -100,9 +105,36 @@ class _InstantTranslationScreenState extends State<InstantTranslationScreen> {
   void initState() {
     super.initState();
     _speech = stt.SpeechToText();
+    _textController.text = _inputText;
+
+    // ✅ Lifecycle observer register
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    // ✅ Audio stop and cleanup
+    AudioPlayerHelper.stopAudio();
+    WidgetsBinding.instance.removeObserver(this);
+    _textController.dispose();
+    super.dispose();
+  }
+
+  // ✅ App lifecycle changes handle
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.hidden) {
+      AudioPlayerHelper.pauseAudio();
+      debugPrint("📱 App paused/inactive - Audio paused");
+    }
   }
 
   void _onNavTap(int index) {
+    // ✅ Navigation e audio pause
+    AudioPlayerHelper.pauseAudio();
+
     setState(() => _currentIndex = index);
     switch (index) {
       case 0:
@@ -132,6 +164,7 @@ class _InstantTranslationScreenState extends State<InstantTranslationScreen> {
           onResult: (val) {
             setState(() {
               _inputText = val.recognizedWords;
+              _textController.text = _inputText;
             });
           },
           localeId: _languageMap[_sourceLanguage] != null
@@ -142,6 +175,35 @@ class _InstantTranslationScreenState extends State<InstantTranslationScreen> {
     } else {
       setState(() => _isListening = false);
       _speech.stop();
+    }
+  }
+
+  void _handleSendMessage() {
+    String textToTranslate = _textController.text.trim();
+
+    if (textToTranslate.isNotEmpty) {
+      // Store the input text to display in source box
+      setState(() {
+        _displayedSourceText = textToTranslate;
+      });
+
+      // Translate the text
+      _translationController.translateText(
+        textToTranslate,
+        _languageMap[_targetLanguage]!,
+      );
+
+      // Clear input field
+      _textController.clear();
+      setState(() {
+        _inputText = "";
+      });
+
+      // Stop listening if active
+      if (_isListening) {
+        setState(() => _isListening = false);
+        _speech.stop();
+      }
     }
   }
 
@@ -171,7 +233,11 @@ class _InstantTranslationScreenState extends State<InstantTranslationScreen> {
                   child: Row(
                     children: [
                       GestureDetector(
-                        onTap: () => context.go(AppRoutes.home),
+                        onTap: () {
+                          // ✅ Back button e audio pause
+                          AudioPlayerHelper.pauseAudio();
+                          context.go(AppRoutes.home);
+                        },
                         child:
                         Assets.icons.backwhite.image(width: 21, height: 21),
                       ),
@@ -220,9 +286,9 @@ class _InstantTranslationScreenState extends State<InstantTranslationScreen> {
                         const SizedBox(height: 30),
                         _buildTranslationBox(
                           language: _sourceLanguage,
-                          text: _inputText.isEmpty
+                          text: _displayedSourceText.isEmpty
                               ? "Say or type something..."
-                              : _inputText,
+                              : _displayedSourceText,
                           showSoundIcon: false,
                         ),
                         const SizedBox(height: 20),
@@ -307,21 +373,13 @@ class _InstantTranslationScreenState extends State<InstantTranslationScreen> {
       child: Column(
         children: [
           TextField(
-            controller: TextEditingController(text: _inputText)
-              ..selection = TextSelection.fromPosition(
-                TextPosition(offset: _inputText.length),
-              ),
+            controller: _textController,
             onChanged: (val) => setState(() => _inputText = val),
             decoration: InputDecoration(
               hintText: "Type something to translate...",
               suffixIcon: IconButton(
                 icon: Assets.icons.send.image(width: 22, height: 22),
-                onPressed: () {
-                  _translationController.translateText(
-                    _inputText,
-                    _languageMap[_targetLanguage]!,
-                  );
-                },
+                onPressed: _handleSendMessage,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -374,12 +432,26 @@ class _InstantTranslationScreenState extends State<InstantTranslationScreen> {
                   color: Color(0xFF003366),
                 ),
               ),
+              // ✅ Updated sound icon with toggle functionality
               if (showSoundIcon && (audioUrl?.isNotEmpty ?? false))
-                Obx(() => IconButton(
-                  icon: AudioPlayerHelper.isPlaying.value
-                      ? Assets.icons.sound.image(width: 28, height: 28)
-                      : Assets.icons.sound.image(width: 28, height: 28),
-                  onPressed: () => AudioPlayerHelper.playAudio(audioUrl!),
+                Obx(() => GestureDetector(
+                  onTap: () => AudioPlayerHelper.togglePlayPause(audioUrl!),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AudioPlayerHelper.isPlaying.value
+                          ? const Color(0xFF003366).withOpacity(0.1)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: AudioPlayerHelper.isPlaying.value
+                        ? const Icon(
+                      Icons.pause_circle_filled,
+                      size: 32,
+                      color: Color(0xFF003366),
+                    )
+                        : Assets.icons.sound.image(width: 28, height: 28),
+                  ),
                 )),
             ],
           ),
