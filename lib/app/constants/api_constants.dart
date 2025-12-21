@@ -35,9 +35,10 @@ class ApiConstants {
   // Profile Endpoints
   // ==========================================
   static const String profile = "/api/auth/me/";
+  static const String deleteProfile = "/api/profile/delete/";  // NEW
 
   // ==========================================
-  // Payment & Subscription Endpoints (NEW)
+  // Payment & Subscription Endpoints
   // ==========================================
   static const String paymentPlans = "/api/payment/plans/";
   static const String iapValidate = "/api/payment/iap/validate/";
@@ -60,4 +61,7 @@ class ApiConstants {
 
   /// Get subscription management URL
   static String get subscriptionManageUrl => baseUrl + subscriptionManage;
+
+  /// Get delete profile URL
+  static String get deleteProfileUrl => baseUrl + deleteProfile;
 }

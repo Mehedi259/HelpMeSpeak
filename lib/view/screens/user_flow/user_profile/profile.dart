@@ -1,3 +1,5 @@
+// lib/view/screens/user_flow/user_profile/profile.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,7 @@ import '../../../../utils/storage_helper.dart';
 import '../../../widgets/navigation.dart';
 import '../../../../app/routes/app_routes.dart';
 import '../../../../controllers/profile_controller.dart';
+import '../../../../controllers/delete_profile_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -18,10 +21,11 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final ProfileController _profileController = Get.put(ProfileController());
+  final DeleteProfileController _deleteController = Get.put(DeleteProfileController());
 
   int _currentIndex = 4;
 
-  // Local data from SharedPreferences (NEW)
+  // Local data from SharedPreferences
   String? _localGender;
   String? _localDateOfBirth;
 
@@ -32,7 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadLocalData();
   }
 
-  /// Load Gender & DOB from SharedPreferences (NEW)
+  /// Load Gender & DOB from SharedPreferences
   Future<void> _loadLocalData() async {
     final gender = await StorageHelper.getGender();
     final dob = await StorageHelper.getDateOfBirth();
@@ -68,7 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // Clear token from SharedPreferences
     await StorageHelper.clearToken();
 
-    // Also clear gender & DOB (NEW)
+    // Also clear gender & DOB
     await StorageHelper.clearGender();
     await StorageHelper.clearDateOfBirth();
 
@@ -76,12 +80,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context.go(AppRoutes.signin);
     }
 
-    Get.snackbar(
-      "Signed Out",
-      "You have been logged out successfully",
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.grey.shade200,
-      colorText: Colors.black87,
+    // Show success message using ScaffoldMessenger instead of Get.snackbar
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text("You have been logged out successfully"),
+          backgroundColor: Colors.grey.shade700,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  /// Delete Account with confirmation
+  void _deleteAccount(BuildContext context) async {
+    _deleteController.showDeleteConfirmation(
+      context,
+          () async {
+        print("🔥 Delete confirmation accepted");
+
+        final success = await _deleteController.deleteAccount();
+
+        print("🔥 Delete result: $success");
+
+        if (success) {
+          if (context.mounted) {
+            // Show success message
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Your account has been permanently deleted"),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 3),
+              ),
+            );
+
+            // Wait a bit for the message to show
+            await Future.delayed(const Duration(milliseconds: 500));
+
+            // Navigate to sign in screen
+            if (context.mounted) {
+              print("🔥 Navigating to signin");
+              context.go(AppRoutes.signin);
+            }
+          }
+        } else {
+          if (context.mounted) {
+            // Show error message
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Failed to delete account. Please try again."),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+        }
+      },
     );
   }
 
@@ -158,7 +212,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           const SizedBox(height: 20),
 
-                          /// Profile Picture (existing - from backend)
+                          /// Profile Picture
                           Center(
                             child: CircleAvatar(
                               radius: 60,
@@ -168,30 +222,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   : Assets.images.profile.provider(),
                             ),
                           ),
-                          const SizedBox(height: 30),
-
-                          /// Full Name (existing - from backend)
-                          if (profile != null && profile.fullName.isNotEmpty) ...[
-                            _buildTextField("Full Name", profile.fullName),
-                            const SizedBox(height: 20),
-                          ],
-
-                          /// Gender (NEW - from SharedPreferences)
-                          if (_localGender != null && _localGender!.isNotEmpty) ...[
-                            _buildTextField(
-                              "Gender",
-                              _localGender!.substring(0, 1).toUpperCase() +
-                                  _localGender!.substring(1),
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-
-                          /// Date of Birth (NEW - from SharedPreferences)
-                          if (_localDateOfBirth != null && _localDateOfBirth!.isNotEmpty) ...[
-                            _buildTextField("Date of Birth", _localDateOfBirth!),
-                            const SizedBox(height: 20),
-                          ],
-
                           const SizedBox(height: 30),
 
                           /// Edit Profile Button
@@ -221,6 +251,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           const SizedBox(height: 20),
 
+                          /// Full Name
+                          if (profile != null && profile.fullName.isNotEmpty) ...[
+                            _buildTextField("Full Name", profile.fullName),
+                            const SizedBox(height: 20),
+                          ],
+
+                          /// Gender
+                          if (_localGender != null && _localGender!.isNotEmpty) ...[
+                            _buildTextField(
+                              "Gender",
+                              _localGender!.substring(0, 1).toUpperCase() +
+                                  _localGender!.substring(1),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+
+                          /// Date of Birth
+                          if (_localDateOfBirth != null && _localDateOfBirth!.isNotEmpty) ...[
+                            _buildTextField("Date of Birth", _localDateOfBirth!),
+                            const SizedBox(height: 20),
+                          ],
+
+                          const SizedBox(height: 80),
+
                           /// Sign Out Button
                           Center(
                             child: ElevatedButton(
@@ -242,6 +296,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                           ),
+                          const SizedBox(height: 20),
+
+                          /// Delete Account Button
+                          Center(
+                            child: Obx(() => ElevatedButton(
+                              onPressed: _deleteController.isDeleting.value
+                                  ? null
+                                  : () => _deleteAccount(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _deleteController.isDeleting.value
+                                    ? Colors.grey
+                                    : Colors.red.shade700,
+                                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: _deleteController.isDeleting.value
+                                  ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                                  : const Text(
+                                "Delete Account",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            )),
+                          ),
                           const SizedBox(height: 30),
                         ],
                       ),
@@ -256,7 +346,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  /// Reusable TextField (existing)
+  /// Reusable TextField
   Widget _buildTextField(String label, String value) {
     return Align(
       alignment: Alignment.centerLeft,
