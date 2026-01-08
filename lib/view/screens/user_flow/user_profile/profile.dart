@@ -225,31 +225,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(height: 30),
 
                           /// Edit Profile Button
-                          Center(
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                await context.push(AppRoutes.editProfile);
-                                // Reload local data after returning from edit screen
-                                _loadLocalData();
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue.shade700,
-                                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: const Text(
-                                "Edit Profile",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
+                          _buildModernButton(
+                            onPressed: () async {
+                              await context.push(AppRoutes.editProfile);
+                              _loadLocalData();
+                            },
+                            label: "Edit Profile",
+                            icon: Icons.edit_rounded,
+                            gradient: LinearGradient(
+                              colors: [Colors.blue.shade600, Colors.blue.shade800],
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
+
+                          /// Privacy Policy Button
+                          _buildModernButton(
+                            onPressed: () async {
+                              await context.push(AppRoutes.privacyPolicy);
+                              _loadLocalData();
+                            },
+                            label: "Privacy Policy",
+                            icon: Icons.privacy_tip_rounded,
+                            gradient: LinearGradient(
+                              colors: [Colors.indigo.shade600, Colors.indigo.shade800],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
 
                           /// Full Name
                           if (profile != null && profile.fullName.isNotEmpty) ...[
@@ -273,65 +274,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             const SizedBox(height: 20),
                           ],
 
-                          const SizedBox(height: 80),
+                          const SizedBox(height: 40),
 
                           /// Sign Out Button
-                          Center(
-                            child: ElevatedButton(
-                              onPressed: () => _signOut(context),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue.shade700,
-                                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: const Text(
-                                "Sign Out",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
+                          _buildModernOutlineButton(
+                            onPressed: () => _signOut(context),
+                            label: "Sign Out",
+                            icon: Icons.logout_rounded,
+                            color: Colors.orange.shade700,
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
 
                           /// Delete Account Button
-                          Center(
-                            child: Obx(() => ElevatedButton(
-                              onPressed: _deleteController.isDeleting.value
-                                  ? null
-                                  : () => _deleteAccount(context),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: _deleteController.isDeleting.value
-                                    ? Colors.grey
-                                    : Colors.red.shade700,
-                                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: _deleteController.isDeleting.value
-                                  ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                                  : const Text(
-                                "Delete Account",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            )),
-                          ),
+                          Obx(() => _buildModernOutlineButton(
+                            onPressed: _deleteController.isDeleting.value
+                                ? null
+                                : () => _deleteAccount(context),
+                            label: "Delete Account",
+                            icon: Icons.delete_forever_rounded,
+                            color: Colors.red.shade700,
+                            isLoading: _deleteController.isDeleting.value,
+                          )),
                           const SizedBox(height: 30),
                         ],
                       ),
@@ -344,6 +307,122 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       );
     });
+  }
+
+  /// Modern Gradient Button
+  Widget _buildModernButton({
+    required VoidCallback onPressed,
+    required String label,
+    required IconData icon,
+    required Gradient gradient,
+  }) {
+    return Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: gradient.colors.first.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: Colors.white, size: 22),
+                const SizedBox(width: 12),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Modern Outline Button
+  Widget _buildModernOutlineButton({
+    required VoidCallback? onPressed,
+    required String label,
+    required IconData icon,
+    required Color color,
+    bool isLoading = false,
+  }) {
+    return Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: onPressed == null ? Colors.grey.shade300 : color,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (isLoading)
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: color,
+                      strokeWidth: 2.5,
+                    ),
+                  )
+                else ...[
+                  Icon(icon, color: onPressed == null ? Colors.grey : color, size: 22),
+                  const SizedBox(width: 12),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: onPressed == null ? Colors.grey : color,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   /// Reusable TextField
