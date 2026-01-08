@@ -1,20 +1,113 @@
 // lib/view/screens/user_flow/home/subscription_popup.dart
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../controllers/subscription_controller.dart';
 import '../../../../gen/assets.gen.dart';
 import '../../../widgets/button.dart';
 
-class SubscriptionScreen extends StatelessWidget {
+class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(SubscriptionController());
+  State<SubscriptionScreen> createState() => _SubscriptionScreenState();
+}
 
+class _SubscriptionScreenState extends State<SubscriptionScreen> {
+  int selectedPlanIndex = -1;
+
+  // Static plan data
+  final List<Map<String, dynamic>> plans = [
+    {
+      'name': 'trial',
+      'title': 'Free',
+      'price': 'Free',
+      'description': 'Perfect for casual use—start translating today',
+      'features': [
+        '1 language pair',
+        'Basic phrases',
+        'No offline packs',
+      ],
+    },
+    {
+      'name': 'monthly',
+      'title': 'Pro Monthly',
+      'price': '\$9.99/month',
+      'description': 'Unlock unlimited possibilities with monthly flexibility',
+      'features': [
+        'Unlimited language pairs',
+        'All phrase library (Phrasebook)',
+        'Offline packs',
+      ],
+    },
+    {
+      'name': 'annual',
+      'title': 'Pro Annual',
+      'price': '\$74.99/year',
+      'description': 'Save more with the best value—go annual',
+      'features': [
+        'Same as monthly',
+        '≈37–38% cheaper vs monthly',
+        'Optional 7-day trial',
+      ],
+    },
+  ];
+
+  void selectPlan(int index) {
+    setState(() {
+      selectedPlanIndex = index;
+    });
+  }
+
+  void handleSubscribe() {
+    if (selectedPlanIndex == -1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a subscription plan'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final selectedPlan = plans[selectedPlanIndex];
+
+    // Free plan - just navigate
+    if (selectedPlan['name'] == 'trial') {
+      context.go('/home');
+      return;
+    }
+
+    // Paid plan - show message (you can implement purchase logic here)
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Subscribing to ${selectedPlan['title']}...'),
+        backgroundColor: Colors.blue,
+      ),
+    );
+
+    // TODO: Implement actual purchase logic here
+    // For now, just navigate to home after a delay
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        context.go('/home');
+      }
+    });
+  }
+
+  void handleRestorePurchases() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Restoring purchases...'),
+        backgroundColor: Colors.blue,
+      ),
+    );
+
+    // TODO: Implement restore purchases logic here
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
@@ -22,169 +115,100 @@ class SubscriptionScreen extends StatelessWidget {
             child: Assets.images.subscription.image(fit: BoxFit.cover),
           ),
           SafeArea(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  const Center(
+                    child: Text(
+                      'Choose the right plan for you',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 20,
+                        color: Color(0xFF3C7AC0),
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Center(
+                    child: Text(
+                      'Flexible plans to match your needs.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                        fontSize: 13,
+                        color: Color(0xFF676767),
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
 
-              return SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    const Center(
-                      child: Text(
-                        'Choose the right plan for you',
-                        textAlign: TextAlign.center,
+                  // Plans List
+                  ...plans.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final plan = entry.value;
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: GestureDetector(
+                        onTap: () => selectPlan(index),
+                        child: _PlanCard(
+                          isSelected: selectedPlanIndex == index,
+                          headerTitle: plan['title'],
+                          priceText: plan['price'],
+                          description: plan['description'],
+                          features: (plan['features'] as List<String>)
+                              .map((text) => _BulletItem(
+                            text: text,
+                            color: const Color(0xFF261E1E),
+                          ))
+                              .toList(),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+
+                  const SizedBox(height: 20),
+
+                  // Subscribe Button
+                  CustomButton(
+                    text: 'Subscribe',
+                    onPressed: handleSubscribe,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Restore Purchases Button
+                  Center(
+                    child: TextButton(
+                      onPressed: handleRestorePurchases,
+                      child: const Text(
+                        'Restore Purchases',
                         style: TextStyle(
                           fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 20,
+                          fontSize: 14,
                           color: Color(0xFF3C7AC0),
-                          decoration: TextDecoration.none,
+                          decoration: TextDecoration.underline,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    const Center(
-                      child: Text(
-                        'Flexible plans to match your needs.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w400,
-                          fontSize: 13,
-                          color: Color(0xFF676767),
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
+                  ),
 
-                    // Plans List
-                    ...controller.plans.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final plan = entry.value;
-                      final product = controller.getProductForPlan(plan);
-
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: GestureDetector(
-                          onTap: () => controller.selectPlan(index),
-                          child: _PlanCard(
-                            isSelected: controller.selectedPlanIndex.value == index,
-                            headerTitle: _getPlanTitle(plan.name),
-                            priceText: product?.price ?? plan.displayPrice,
-                            description: _getPlanDescription(plan.name),
-                            features: _getPlanFeatures(plan.name),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-
-                    const SizedBox(height: 20),
-
-                    // Subscribe Button
-                    CustomButton(
-                      text: 'Subscribe',
-                      onPressed: () async {
-                        if (controller.selectedPlanIndex.value == -1) {
-                          Get.snackbar('Select Plan', 'Please select a subscription plan');
-                          return;
-                        }
-
-                        final selectedPlan = controller.plans[controller.selectedPlanIndex.value];
-
-                        // Free plan - just navigate
-                        if (selectedPlan.name == 'trial' || selectedPlan.price == '0.00') {
-                          context.go('/home');
-                          return;
-                        }
-
-                        // Paid plan - initiate purchase
-                        await controller.purchaseSubscription(selectedPlan);
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Restore Purchases Button
-                    Center(
-                      child: TextButton(
-                        onPressed: () => controller.restorePurchases(),
-                        child: const Text(
-                          'Restore Purchases',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            color: Color(0xFF3C7AC0),
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              );
-            }),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
           ),
         ],
       ),
     );
-  }
-
-  String _getPlanTitle(String planName) {
-    switch (planName.toLowerCase()) {
-      case 'trial':
-        return 'Free';
-      case 'monthly':
-        return 'Pro Monthly';
-      case 'annual':
-        return 'Pro Annual';
-      default:
-        return planName;
-    }
-  }
-
-  String _getPlanDescription(String planName) {
-    switch (planName.toLowerCase()) {
-      case 'trial':
-        return 'Perfect for casual use—start translating today';
-      case 'monthly':
-        return 'Unlock unlimited possibilities with monthly flexibility';
-      case 'annual':
-        return 'Save more with the best value—go annual';
-      default:
-        return '';
-    }
-  }
-
-  List<_BulletItem> _getPlanFeatures(String planName) {
-    switch (planName.toLowerCase()) {
-      case 'trial':
-        return const [
-          _BulletItem(text: '1 language pair', color: Color(0xFF261E1E)),
-          _BulletItem(text: 'Basic phrases', color: Color(0xFF261E1E)),
-          _BulletItem(text: 'No offline packs', color: Color(0xFF261E1E)),
-        ];
-      case 'monthly':
-        return const [
-          _BulletItem(text: 'Unlimited language pairs', color: Color(0xFF261E1E)),
-          _BulletItem(text: 'All phrase library (Phrasebook)', color: Color(0xFF261E1E)),
-          _BulletItem(text: 'Offline packs', color: Color(0xFF261E1E)),
-        ];
-      case 'annual':
-        return const [
-          _BulletItem(text: 'Same as monthly', color: Color(0xFF261E1E)),
-          _BulletItem(text: '≈37–38% cheaper vs monthly', color: Color(0xFF261E1E)),
-          _BulletItem(text: 'Optional 7-day trial', color: Color(0xFF261E1E)),
-        ];
-      default:
-        return [];
-    }
   }
 }
 
@@ -259,7 +283,8 @@ class _PlanCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Column(
-              children: features.map((e) => Padding(
+              children: features
+                  .map((e) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,7 +313,8 @@ class _PlanCard extends StatelessWidget {
                     ),
                   ],
                 ),
-              )).toList(),
+              ))
+                  .toList(),
             ),
           ],
         ),

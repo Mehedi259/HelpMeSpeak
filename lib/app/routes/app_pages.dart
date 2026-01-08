@@ -31,25 +31,6 @@ import 'app_routes.dart';
 class AppPages {
   static final GoRouter router = GoRouter(
     initialLocation: AppRoutes.splash,
-    redirect: (context, state) async {
-      // Check if user is trying to access subscription screen
-      if (state.matchedLocation == AppRoutes.subscription) {
-        // Initialize subscription controller if not already done
-        final controller = Get.isRegistered<SubscriptionController>()
-            ? Get.find<SubscriptionController>()
-            : Get.put(SubscriptionController());
-
-        // Check subscription status
-        await controller.checkSubscriptionStatus();
-
-        // If user is paid, redirect to home
-        if (controller.isPaidUser.value) {
-          return AppRoutes.home;
-        }
-      }
-
-      return null; // Allow navigation
-    },
     routes: [
       GoRoute(
         path: AppRoutes.splash,
