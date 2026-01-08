@@ -18,10 +18,10 @@ import '../../view/screens/onbording/onbording_screen4.dart';
 import '../../view/screens/auth/signin_signup/sign_in.dart';
 import '../../view/screens/auth/signin_signup/sign_up.dart';
 import '../../view/screens/user_flow/home/home.dart';
-import '../../view/screens/user_flow/home/subscription_payment.dart';
 import '../../view/screens/user_flow/home/subscription_popup.dart';
 import '../../view/screens/user_flow/phrasebook/phrasebook.dart';
 import '../../view/screens/user_flow/user_profile/edit_profile.dart';
+import '../../view/screens/user_flow/user_profile/privacy_policy.dart';
 import '../../view/screens/user_flow/user_profile/profile.dart';
 import '../../view/screens/user_flow/talk_with_ai/ai_chat_bot.dart';
 import '../../view/screens/user_flow/instant_translation/instant_translation.dart';
@@ -118,10 +118,6 @@ class AppPages {
         builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
-        path: AppRoutes.subscriptionPayment,
-        builder: (context, state) => const SubscriptionPaymentScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.profile,
         builder: (context, state) => const ProfileScreen(),
       ),
@@ -144,6 +140,10 @@ class AppPages {
       GoRoute(
         path: AppRoutes.singInsignUp,
         builder: (context, state) => const SignInSignUpScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.privacyPolicy,
+        builder: (context, state) => const PrivacyPolicyScreen(),
       ),
     ],
   );
