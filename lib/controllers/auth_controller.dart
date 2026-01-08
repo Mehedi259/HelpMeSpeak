@@ -62,7 +62,7 @@ class AuthController extends GetxController {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Login successful")),
           );
-          context.go(AppRoutes.subscription);
+          context.go(AppRoutes.home);
         }
       } else {
         String message = res["message"]?.toString() ??
@@ -70,14 +70,14 @@ class AuthController extends GetxController {
             "Login failed";
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message)),
+            const SnackBar(content: Text("Please sign up and try again")),
           );
         }
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          const SnackBar(content: Text("Please sign up and try again")),
         );
       }
     } finally {
