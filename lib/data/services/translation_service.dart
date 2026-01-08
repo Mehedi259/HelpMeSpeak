@@ -9,9 +9,20 @@ class TranslationService {
     required String text,
     required String targetLang,
   }) async {
+    // ✅ Handle Chinese (Traditional) language code properly
+    String langCode = targetLang;
+
+    // If it's Chinese Traditional, use the full code "zh-TW"
+    if (targetLang.toLowerCase() == "zh-tw") {
+      langCode = "zh-TW";
+    } else {
+      // For other languages, use first 2 characters
+      langCode = targetLang.toLowerCase().substring(0, 2);
+    }
+
     final body = {
       "text": text,
-      "target_lang": targetLang.toLowerCase().substring(0, 2),
+      "target_lang": langCode,
     };
 
     print("📤 Translation request body: $body");
@@ -24,7 +35,6 @@ class TranslationService {
     print("📥 Translation API response: $response");
 
     if (response is Map<String, dynamic>) {
-      // ✅ Extract the required fields with proper keys
       return {
         "translated_text": response["translated_text"] ?? "",
         "audio_url": response["audio_url"] ?? "",
