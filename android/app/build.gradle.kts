@@ -1,5 +1,3 @@
-// android/app/build.gradle.kts
-
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -11,7 +9,7 @@ import java.util.Properties
 
         android {
             namespace = "com.example.helpmespeak"
-            compileSdk = flutter.compileSdkVersion
+            compileSdk = 36  // Updated from 34 to 36
             ndkVersion = "27.0.12077973"
 
             compileOptions {
@@ -23,9 +21,7 @@ import java.util.Properties
                 jvmTarget = "11"
             }
 
-            // -------------------------------
             // Load keystore from key.properties
-            // -------------------------------
             val keystoreProperties = Properties()
             val keystorePropertiesFile = rootProject.file("key.properties")
             if (keystorePropertiesFile.exists()) {
@@ -35,16 +31,18 @@ import java.util.Properties
             defaultConfig {
                 applicationId = "com.example.helpmespeak"
                 minSdk = flutter.minSdkVersion
-                targetSdk = flutter.targetSdkVersion
-                versionCode = flutter.versionCode
-                versionName = flutter.versionName
+                targetSdk = 34
+                versionCode = 1
+                versionName = "1.0.0"
             }
 
             signingConfigs {
                 create("release") {
                     keyAlias = keystoreProperties["keyAlias"] as String?
                     keyPassword = keystoreProperties["keyPassword"] as String?
-                    storeFile = file(keystoreProperties["storeFile"] ?: "")
+                    storeFile = keystorePropertiesFile.parentFile?.let {
+                        file("${it.path}/${keystoreProperties["storeFile"]}")
+                    }
                     storePassword = keystoreProperties["storePassword"] as String?
                 }
             }
@@ -52,14 +50,13 @@ import java.util.Properties
             buildTypes {
                 release {
                     signingConfig = signingConfigs.getByName("release")
-                    isMinifyEnabled = false
-                    isShrinkResources = false
+                    isMinifyEnabled = true
+                    isShrinkResources = true
                     proguardFiles(
                         getDefaultProguardFile("proguard-android-optimize.txt"),
                         "proguard-rules.pro"
                     )
                 }
-           
             }
         }
 
