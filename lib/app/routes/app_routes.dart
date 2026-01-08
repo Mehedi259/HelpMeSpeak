@@ -20,4 +20,5 @@ class AppRoutes {
   static const String instantTranslation = '/instantTranslation';
   static const String phrasebook = '/phrasebook';
   static const String singInsignUp = '/singInsignUp';
+  static const String privacyPolicy = '/privacyPolicy';
 }
