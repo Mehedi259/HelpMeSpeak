@@ -19,7 +19,7 @@ class AuthService {
     } else if (response is Map<String, dynamic>) {
       return response;
     } else {
-      throw Exception("Unexpected login response: $response");
+      throw Exception("Please sign up and Try again");
     }
   }
 
