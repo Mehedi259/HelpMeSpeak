@@ -34,7 +34,7 @@ import java.util.Properties
 
             defaultConfig {
                 applicationId = "com.example.helpmespeak"
-                minSdk = 21  // Required for in_app_purchase
+                minSdk = flutter.minSdkVersion
                 targetSdk = flutter.targetSdkVersion
                 versionCode = flutter.versionCode
                 versionName = flutter.versionName
@@ -59,10 +59,7 @@ import java.util.Properties
                         "proguard-rules.pro"
                     )
                 }
-
-                debug {
-                    signingConfig = signingConfigs.getByName("release") // Optional
-                }
+           
             }
         }
 
@@ -71,7 +68,6 @@ flutter {
 }
 
 dependencies {
-    // Google Play Billing Library (for in-app purchases)
     implementation("com.android.billingclient:billing:6.1.0")
     implementation("com.android.billingclient:billing-ktx:6.1.0")
 }
