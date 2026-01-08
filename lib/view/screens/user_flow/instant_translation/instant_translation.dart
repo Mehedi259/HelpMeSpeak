@@ -19,12 +19,12 @@ class InstantTranslationScreen extends StatefulWidget {
 }
 
 class _InstantTranslationScreenState extends State<InstantTranslationScreen>
-    with WidgetsBindingObserver {  // ✅ Lifecycle observer added
+    with WidgetsBindingObserver {
   int _currentIndex = 1;
   late stt.SpeechToText _speech;
   bool _isListening = false;
   String _inputText = "";
-  String _displayedSourceText = ""; // To show in source language box
+  String _displayedSourceText = "";
   final TextEditingController _textController = TextEditingController();
 
   /// Language state
@@ -39,6 +39,7 @@ class _InstantTranslationScreenState extends State<InstantTranslationScreen>
     "Bengali": "bn",
     "Bosnian": "bs",
     "Catalan": "ca",
+    "Chinese": "zh-TW",
     "Croatian": "hr",
     "Czech": "cs",
     "Danish": "da",
@@ -106,21 +107,17 @@ class _InstantTranslationScreenState extends State<InstantTranslationScreen>
     super.initState();
     _speech = stt.SpeechToText();
     _textController.text = _inputText;
-
-    // ✅ Lifecycle observer register
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    // ✅ Audio stop and cleanup
     AudioPlayerHelper.stopAudio();
     WidgetsBinding.instance.removeObserver(this);
     _textController.dispose();
     super.dispose();
   }
 
-  // ✅ App lifecycle changes handle
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
@@ -132,9 +129,7 @@ class _InstantTranslationScreenState extends State<InstantTranslationScreen>
   }
 
   void _onNavTap(int index) {
-    // ✅ Navigation e audio pause
     AudioPlayerHelper.pauseAudio();
-
     setState(() => _currentIndex = index);
     switch (index) {
       case 0:
@@ -182,24 +177,20 @@ class _InstantTranslationScreenState extends State<InstantTranslationScreen>
     String textToTranslate = _textController.text.trim();
 
     if (textToTranslate.isNotEmpty) {
-      // Store the input text to display in source box
       setState(() {
         _displayedSourceText = textToTranslate;
       });
 
-      // Translate the text
       _translationController.translateText(
         textToTranslate,
         _languageMap[_targetLanguage]!,
       );
 
-      // Clear input field
       _textController.clear();
       setState(() {
         _inputText = "";
       });
 
-      // Stop listening if active
       if (_isListening) {
         setState(() => _isListening = false);
         _speech.stop();
@@ -234,7 +225,6 @@ class _InstantTranslationScreenState extends State<InstantTranslationScreen>
                     children: [
                       GestureDetector(
                         onTap: () {
-                          // ✅ Back button e audio pause
                           AudioPlayerHelper.pauseAudio();
                           context.go(AppRoutes.home);
                         },
@@ -432,7 +422,6 @@ class _InstantTranslationScreenState extends State<InstantTranslationScreen>
                   color: Color(0xFF003366),
                 ),
               ),
-              // ✅ Updated sound icon with toggle functionality
               if (showSoundIcon && (audioUrl?.isNotEmpty ?? false))
                 Obx(() => GestureDetector(
                   onTap: () => AudioPlayerHelper.togglePlayPause(audioUrl!),
